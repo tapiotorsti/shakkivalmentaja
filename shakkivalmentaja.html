@@ -1,0 +1,2972 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shakkivalmentaja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Symbols+2&display=swap">
+<style>
+/* Layout: lauta + arviopalkki vasemmalla (puhelimessa ylhäällä), suositukset ja asetukset paneelissa sen vieressä */
+:root {
+  /* Vuono: sinharmaa lauta, syvänsininen käyttöliittymä, meripihka korostuksena (valinnat, paras siirto) */
+  --bg: #eef2f5;
+  --surface: #fbfcfd;
+  --ink: #14202b;
+  --muted: #5a6b7a;
+  --line: #d2dbe3;
+  --accent: #1f4e79;
+  --accent-ink: #ffffff;
+  --sq-light: #e4eaef;
+  --sq-dark: #7e98ae;
+  --coord-light: #6a8399;
+  --coord-dark: #eef2f5;
+  --sel: rgba(232, 163, 61, .6);
+  --last: rgba(232, 163, 61, .38);
+  --dot: rgba(15, 30, 45, .28);
+  --check: #d9412f;
+  --white-piece: #fdfdf8;
+  --black-piece: #161b20;
+  --bar-white: #f5f8fa;
+  --bar-black: #1d2a36;
+  --a1: #e39a2d;
+  --a2: #15967f;
+  --a3: #8b5cf6;
+  --q-inacc: #b48600;
+  --q-mistake: #d9650f;
+  --q-blunder: #cf2f3a;
+  --q-best: #d23f8f;
+  --badge-ink: #ffffff;
+  --scrim: rgba(8, 18, 28, .55);
+  --font-display: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --font-piece: "Noto Sans Symbols 2", "Segoe UI Symbol", "Apple Symbols", "DejaVu Sans", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f161d; --surface: #16202a; --ink: #e6edf3; --muted: #93a4b4; --line: #263442;
+    --accent: #8bbbe8; --accent-ink: #0f161d;
+    --sq-light: #b8c5d1; --sq-dark: #58728b; --coord-light: #4d667e; --coord-dark: #c9d4de;
+    --sel: rgba(240, 170, 60, .62); --last: rgba(240, 170, 60, .42);
+    --dot: rgba(8, 16, 24, .38); --bar-white: #e7edf2; --bar-black: #22303d;
+    --a1: #f0aa3c; --a2: #2cc5a8; --a3: #a78bfa;
+    --q-inacc: #e2b740; --q-mistake: #f28a43; --q-blunder: #ff6a6f; --q-best: #f472b6; --badge-ink: #0f161d;
+    --scrim: rgba(4, 9, 14, .62);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f161d; --surface: #16202a; --ink: #e6edf3; --muted: #93a4b4; --line: #263442;
+  --accent: #8bbbe8; --accent-ink: #0f161d;
+  --sq-light: #b8c5d1; --sq-dark: #58728b; --coord-light: #4d667e; --coord-dark: #c9d4de;
+  --sel: rgba(240, 170, 60, .62); --last: rgba(240, 170, 60, .42);
+  --dot: rgba(8, 16, 24, .38); --bar-white: #e7edf2; --bar-black: #22303d;
+  --a1: #f0aa3c; --a2: #2cc5a8; --a3: #a78bfa;
+  --q-inacc: #e2b740; --q-mistake: #f28a43; --q-blunder: #ff6a6f; --q-best: #f472b6; --badge-ink: #0f161d;
+  --scrim: rgba(4, 9, 14, .62);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.45 var(--font-body);
+  padding-inline: 16px;
+  padding-block: 14px 28px;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 580px) minmax(0, 1fr);
+  gap: 16px 28px;
+  align-items: start;
+}
+header.top {
+  grid-column: 1 / -1;
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px;
+}
+h1 {
+  margin: 0;
+  font: 800 1.6rem/1.1 var(--font-display);
+  letter-spacing: -.02em;
+}
+h1 span { color: var(--accent); }
+/* Tilarivin leveys on kiinteä, jotta vaihtuva teksti ei rivitä otsikkoa uudelleen ja siirrä lautaa */
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  width: 16.5rem; max-width: 100%;
+  font: 500 .8rem/1 var(--font-mono);
+  color: var(--muted);
+  padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+.pill i { flex: none; }
+.pill span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.pill[data-state="run"] i { background: var(--a1); animation: pulse 1s infinite alternate; }
+.pill[data-state="done"] i { background: var(--accent); }
+.pill[data-state="err"] i { background: var(--check); }
+@keyframes pulse { to { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .pill[data-state="run"] i { animation: none; } }
+
+/* Lauta */
+.board-col { display: grid; gap: 8px; min-width: 0; }
+.board-row { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 8px; }
+.evalbar {
+  position: relative; border-radius: 3px; overflow: hidden;
+  background: var(--bar-black); border: 1px solid var(--line);
+}
+.evalbar .fill {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 50%;
+  background: var(--bar-white); transition: height .35s ease;
+}
+.evalbar.flipped .fill { bottom: auto; top: 0; }
+.board-wrap {
+  position: relative; width: 100%; max-width: 100%; aspect-ratio: 1;
+  container-type: inline-size;
+  border-radius: 4px; overflow: hidden;
+  box-shadow: 0 1px 0 var(--line), 0 10px 28px rgba(0, 0, 0, .14);
+}
+.board { display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); width: 100%; height: 100%; }
+.sq {
+  position: relative; border: 0; padding: 0; margin: 0;
+  display: grid; place-items: center;
+  background: var(--sq-light);
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.sq.dark { background: var(--sq-dark); }
+.sq.last::before, .sq.sel::before { content: ""; position: absolute; inset: 0; background: var(--last); }
+.sq.sel::before { background: var(--sel); }
+.sq.check::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, var(--check) 0%, rgba(217, 65, 47, .5) 45%, transparent 72%); }
+.sq.target::after {
+  content: ""; position: absolute; width: 30%; height: 30%; border-radius: 50%; background: var(--dot);
+}
+.sq.target.capture::after { width: 88%; height: 88%; background: transparent; border: 5px solid var(--dot); }
+.piece {
+  position: relative; z-index: 1;
+  font: 400 10.4cqw/1 var(--font-piece);
+  user-select: none; pointer-events: none;
+  transform: translateY(-2%);
+}
+.piece.ghost { position: absolute; inset: 0; z-index: 0; display: grid; place-items: center; }
+.piece.w {
+  color: var(--white-piece);
+  text-shadow: 0 0 1px #000, 1px 0 0 #222, -1px 0 0 #222, 0 1px 0 #222, 0 -1px 0 #222, 0 2px 3px rgba(0,0,0,.25);
+}
+.piece.b {
+  color: var(--black-piece);
+  text-shadow: 0 0 1px rgba(255,255,255,.5), 0 2px 3px rgba(0,0,0,.25);
+}
+.coord {
+  position: absolute; z-index: 1; pointer-events: none;
+  font: 600 2.2cqw/1 var(--font-body);
+  color: var(--coord-light);
+}
+.sq.dark .coord { color: var(--coord-dark); }
+.coord.rank { top: 4%; left: 5%; }
+.coord.file { bottom: 4%; right: 6%; }
+svg.arrows { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+
+.promo {
+  position: absolute; inset: 0; z-index: 3;
+  display: grid; place-items: center;
+  background: rgba(0, 0, 0, .45);
+}
+.promo .box {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  padding: 10px; background: var(--surface); border-radius: 8px; width: min(80%, 320px);
+}
+.promo button {
+  aspect-ratio: 1; border: 1px solid var(--line); border-radius: 6px; background: var(--sq-light);
+  display: grid; place-items: center;
+}
+.promo button .piece { font-size: 11cqw; }
+
+/* Laudan alla: selaus (tärkein) vasemmalla, harvemmin käytetyt toiminnot hiljaisina oikealla */
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-left: 22px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 2px; margin-left: auto; }
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--surface);
+  font-weight: 600; font-size: .88rem;
+}
+.btn:hover { border-color: var(--muted); }
+.btn.quiet { border-color: transparent; background: transparent; color: var(--muted); font-weight: 500; padding-inline: 8px; }
+.btn.quiet:hover:not(:disabled) { color: var(--ink); border-color: var(--line); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.warn { border-color: var(--check); color: var(--check); }
+.btn:disabled { opacity: .45; cursor: default; }
+
+/* Paneeli */
+.panel { display: grid; gap: 18px; min-width: 0; align-content: start; }
+.section h2 {
+  margin: 0 0 8px;
+  font: 600 .72rem/1 var(--font-body);
+  text-transform: uppercase; letter-spacing: .1em; color: var(--muted);
+}
+/* Suositukset: yksi lista, rivit erotettu hiusviivalla */
+/* Rivien korkeus on kiinteä ja tila varataan valitulle vaihtoehtomäärälle (--rows), joten lista ei pompi laskennan aikana */
+.lines {
+  --rowh: 40px;
+  display: grid; grid-auto-rows: var(--rowh); align-content: start;
+  min-height: calc(var(--rows, 3) * var(--rowh) + 2px);
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow: hidden;
+}
+.line {
+  display: grid; grid-template-columns: 4px 58px minmax(0, 1fr); gap: 10px; align-items: center;
+  width: 100%; height: var(--rowh); text-align: left;
+  padding: 0 10px 0 0; border: 0; border-radius: 0; background: transparent;
+}
+.line.ph .pv { color: var(--muted); }
+.line + .line { border-top: 1px solid var(--line); }
+.line:hover:not(:disabled):not(.empty) { background: var(--bg); }
+.line .chip { align-self: stretch; }
+.line:first-child .pv b { font-size: 1.05rem; }
+.line .ev {
+  font: 500 .88rem/1 var(--font-mono); font-variant-numeric: tabular-nums;
+  padding: 5px 0; text-align: center; border-radius: 4px;
+  background: var(--bar-black); color: var(--bar-white);
+}
+.line .ev.pos { background: var(--bar-white); color: var(--bar-black); box-shadow: inset 0 0 0 1px var(--line); }
+.line .pv { font: 400 .88rem/1.4 var(--font-mono); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.line .pv b { font-weight: 500; font-size: .98rem; }
+.line.empty { color: var(--muted); padding: 8px 12px; grid-template-columns: 1fr; cursor: default; font-size: .9rem; height: auto; min-height: 40px; }
+.hint { margin: 6px 0 0; font-size: .82rem; color: var(--muted); }
+
+.moves {
+  position: relative;
+  display: grid; grid-template-columns: 36px 1fr 1fr; gap: 2px 8px;
+  height: 190px; overflow-y: auto; align-content: start; /* kiinteä korkeus: lista vierii, ei kasva */
+  font: 400 .9rem/1.6 var(--font-mono); font-variant-numeric: tabular-nums;
+  padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface);
+}
+.moves .n { color: var(--muted); }
+.moves .cur { color: var(--accent); font-weight: 500; }
+.moves .none { grid-column: 1 / -1; color: var(--muted); font-family: var(--font-body); }
+
+.settings { display: grid; gap: 14px; }
+.field { display: grid; gap: 6px; }
+.field > label, .field > .lbl { font-size: .85rem; font-weight: 600; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; width: fit-content; }
+.seg button { border: 0; background: var(--surface); padding: 7px 14px; font-size: .88rem; font-weight: 500; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.check { display: flex; gap: 8px; align-items: center; font-size: .9rem; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.range { display: flex; gap: 10px; align-items: center; }
+.range input { flex: 1; accent-color: var(--accent); min-width: 0; }
+.range output { font: 500 .9rem var(--font-mono); width: 2.5ch; text-align: right; }
+
+.fen { display: flex; gap: 8px; flex-wrap: wrap; }
+.fen input {
+  flex: 1 1 220px; min-width: 0;
+  padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
+  font: .8rem var(--font-mono);
+}
+.msg { min-height: 1.2em; font-size: .82rem; color: var(--muted); margin: 6px 0 0; }
+.msg.err { color: var(--check); }
+.note { font-size: .8rem; color: var(--muted); margin: 0; max-width: 60ch; }
+
+/* Siirron arvio */
+.review { display: grid; gap: 4px; align-content: start; min-height: 6.2rem; } /* otsikko + kaksi riviä tekstiä */
+.review.empty { color: var(--muted); font-size: .9rem; }
+.review p { margin: 0; font-size: .9rem; }
+.review p b { font-family: var(--font-mono); font-weight: 500; }
+.rv-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.rv-move { font: 500 1rem var(--font-mono); }
+.rv-head small { color: var(--muted); font-size: .8rem; }
+.badge {
+  font: 600 .8rem/1 var(--font-body); padding: 5px 9px; border-radius: 999px;
+  background: var(--muted); color: var(--badge-ink);
+}
+.badge.best, .badge.good { background: var(--accent); color: var(--accent-ink); }
+.badge.inacc { background: var(--q-inacc); }
+.badge.mistake { background: var(--q-mistake); }
+.badge.blunder { background: var(--q-blunder); }
+.badge.pending { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); }
+.tally {
+  display: grid; gap: 2px; margin-top: 8px;
+  font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums;
+}
+.tally b { color: var(--ink); font-weight: 600; }
+.q { font-family: var(--font-mono); font-weight: 600; margin-left: 1px; }
+.q.inacc { color: var(--q-inacc); }
+.q.mistake { color: var(--q-mistake); }
+.q.blunder { color: var(--q-blunder); }
+.moves .mv {
+  border: 0; background: none; font: inherit; text-align: left;
+  padding: 0 4px; margin-left: -4px; border-radius: 4px; width: fit-content;
+}
+.moves .mv:hover, .var-moves .mv:hover { background: var(--bg); }
+.moves .mv.cur, .var-moves .mv.cur { background: var(--accent); color: var(--accent-ink); }
+.moves .mv.cur .q, .var-moves .mv.cur .q { color: inherit; }
+.moves .mv.off { opacity: .45; }
+
+/* Peli konetta vastaan */
+/* Käynnissä oleva peli on pelin ajan paneelin ainoa korostettu kehys */
+.live-play { padding: 12px; border: 1px solid var(--accent); border-radius: 8px; background: var(--surface); }
+.live-play .msg { min-height: 1.3em; margin: 6px 0 0; }
+.play { display: grid; gap: 10px; }
+.lvlname { font-weight: 400; color: var(--muted); margin-left: 4px; }
+.vs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-weight: 600; font-size: .92rem; }
+.vs span { overflow-wrap: anywhere; min-width: 0; }
+.vs .sep { color: var(--muted); font-weight: 400; }
+.pstate { margin: 0; font-size: .95rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pstate.win { color: var(--accent); font-weight: 700; }
+.pstate.lose { color: var(--q-blunder); font-weight: 700; }
+.pstate.draw { font-weight: 700; }
+.pstate .spin { width: 10px; height: 10px; border-radius: 50%; background: var(--a1); animation: pulse .7s infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .pstate .spin { animation: none; } }
+.play-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.evalbar.off { opacity: .3; }
+.evalbar.off .fill { height: 50% !important; }
+
+/* Välilehdet: yksi näkymä kerrallaan, sisältö vierii omassa alueessaan laudan alla tai vieressä */
+.panel { gap: 0; }
+.tabs { display: flex; border-bottom: 1px solid var(--line); }
+.tab {
+  flex: 1 1 0; min-width: 0; border: 0; background: none; cursor: pointer;
+  padding: 10px 4px 9px; margin-bottom: -1px; border-bottom: 2px solid transparent;
+  font: 600 .88rem/1 var(--font-body); color: var(--muted); white-space: nowrap;
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tabbody {
+  display: grid; gap: 18px; align-content: start;
+  overflow-y: auto; overscroll-behavior: contain;
+  padding-block: 14px 16px; padding-inline: 2px;
+}
+.tabbody > [data-tab]:not(.on) { display: none !important; }
+.moves { height: clamp(150px, calc(var(--avail, 330px) - 60px), 460px); }
+.tool-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding-bottom: 12px; }
+.tool-actions .hint { margin: 0; }
+.tools > .values { margin: 0 0 12px; }
+.more-foot { display: grid; gap: 10px; }
+.toolbar .btn.icon { padding: 8px 10px; }
+@media (min-width: 761px) {
+  .moves { height: 220px; }
+  .tab[data-t="moves"] { display: none; }
+}
+
+/* Aloittelijatila */
+.bswitch {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  font-size: .86rem; font-weight: 600; color: var(--muted); white-space: nowrap;
+}
+.bswitch input { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; }
+body.beginner .bswitch { color: var(--accent); }
+/* Valmentajarivi: kiinteä korkeus, ettei teksti siirrä painikkeita */
+.coach {
+  margin-left: 22px; padding: 8px 12px; height: 4.6em; overflow: hidden;
+  border-radius: 8px; background: var(--surface); border: 1px solid var(--line);
+  font-size: .88rem; line-height: 1.4;
+}
+.coach b { font-weight: 700; }
+.coach .cwarn { color: var(--q-blunder); font-weight: 700; }
+.sq .warn {
+  position: absolute; z-index: 2; top: 4%; right: 5%; width: 26%; height: 26%;
+  border-radius: 50%; background: var(--q-blunder); color: var(--badge-ink);
+  display: grid; place-items: center; font: 800 3cqw/1 var(--font-body);
+  box-shadow: 0 0 0 2px var(--surface); pointer-events: none;
+}
+body.beginner .adv { display: none !important; }
+body.beginner .lines { --rowh: 58px; }
+body.beginner .line { grid-template-columns: 4px minmax(0, 1fr); }
+body.beginner .line .ev { display: none; }
+body.beginner .line .pv {
+  white-space: normal; font-family: var(--font-body); font-size: .9rem;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+body.beginner .line .pv b { font-family: var(--font-mono); }
+body.beginner .review { min-height: 8.4rem; }
+body.beginner .turn .tev { display: none; }
+
+/* Omien pelien haku */
+.fetch { display: grid; gap: 8px; }
+.glist { max-height: 340px; overflow-y: auto; }
+.grow {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 10px; align-items: center;
+  width: 100%; text-align: left; padding: 7px 10px; border: 0; background: transparent;
+}
+.grow + .grow { border-top: 1px solid var(--line); }
+.grow:hover { background: var(--bg); }
+.grow .res {
+  grid-row: span 2; width: 4.6em; text-align: center; padding: 4px 0; border-radius: 4px;
+  font: 700 .72rem/1 var(--font-body); text-transform: uppercase; letter-spacing: .05em;
+  background: var(--line); color: var(--ink);
+}
+.grow .res.win { background: var(--accent); color: var(--accent-ink); }
+.grow .res.loss { background: var(--q-blunder); color: var(--badge-ink); }
+.grow .opp { font-weight: 600; font-size: .9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.grow .opp small { color: var(--muted); font-weight: 400; }
+.grow .meta { font-size: .78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Pelin analyysi */
+.ana-empty { color: var(--muted); font-size: .9rem; }
+.ana { display: grid; gap: 10px; }
+.ginfo { display: grid; gap: 6px; font-size: .88rem; }
+.ginfo .players { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.ginfo .players .lbl { color: var(--muted); margin-right: 2px; }
+.pbtn > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.pbtn {
+  max-width: 100%;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
+  font-size: .86rem; font-weight: 500;
+}
+.pbtn[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.pbtn small { color: var(--muted); font-weight: 400; }
+.pdot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--muted); flex: none; }
+.pdot.w { background: var(--bar-white); }
+.pdot.b { background: var(--bar-black); }
+.ginfo .meta { color: var(--muted); }
+.graph-wrap {
+  position: relative; width: 100%; max-width: 100%; height: 120px;
+  border-radius: 6px; overflow: hidden; border: 1px solid var(--line);
+  cursor: pointer; touch-action: pan-y;
+}
+#graph { display: block; width: 100%; height: 100%; }
+.gcross { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--q-best); pointer-events: none; }
+.gtip {
+  position: absolute; top: 6px; pointer-events: none; white-space: nowrap;
+  padding: 5px 8px; border-radius: 6px; font: 500 .8rem var(--font-mono);
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .18);
+}
+.progress { display: flex; align-items: center; gap: 10px; font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pbar { flex: 1; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; min-width: 60px; }
+.pbar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
+/* Pelaajien vertailu: tiivis taulukko korttien sijaan */
+.tbl-scroll { overflow-x: auto; }
+table.stats { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; }
+.stats th {
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600;
+  text-align: right; padding: 0 0 5px 12px; white-space: nowrap;
+}
+.stats th:first-child { text-align: left; padding-left: 0; }
+.stats td { padding: 6px 0 6px 12px; border-top: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.stats td:first-child { text-align: left; padding-left: 0; white-space: normal; width: 100%; }
+.stats .who { display: flex; align-items: center; gap: 6px; font-weight: 600; overflow-wrap: anywhere; }
+.stats .who small { color: var(--muted); font-weight: 400; }
+.stats .acc { font: 700 1rem var(--font-display); }
+.stats .zero { color: var(--muted); }
+.stats th .q { font-size: .8rem; letter-spacing: 0; }
+.subh { margin: 4px 0 0; font: 600 .68rem/1 var(--font-body); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+/* Käännekohdat: lista, rivit erotettu hiusviivalla */
+.rows { display: grid; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); overflow: hidden; }
+.turn {
+  display: grid; grid-template-columns: 2.4ch auto 1fr auto; align-items: baseline; gap: 4px 10px; width: 100%; text-align: left;
+  padding: 7px 10px; border: 0; border-radius: 0; background: transparent;
+}
+.turn + .turn { border-top: 1px solid var(--line); }
+.turn:hover { background: var(--bg); }
+.turn .q { font-size: .95rem; margin: 0; }
+.turn .rv-move { font-size: .92rem; white-space: nowrap; }
+.turn .tev { font: 400 .82rem var(--font-mono); color: var(--muted); white-space: nowrap; }
+.turn small { color: var(--muted); font-size: .78rem; text-align: right; }
+.rows .none { color: var(--muted); font-size: .88rem; margin: 0; padding: 8px 10px; }
+@media (max-width: 420px) {
+  .turn { grid-template-columns: 2.4ch 1fr auto; }
+  .turn small { grid-column: 2 / -1; text-align: left; }
+}
+textarea.pgn {
+  width: 100%; min-width: 0; resize: vertical; margin-bottom: 8px;
+  padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface);
+  font: .8rem/1.4 var(--font-mono);
+}
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+label.btn { cursor: pointer; }
+.fen input.vh:focus-visible + .btn, label.btn:focus-within { outline: 2px solid var(--accent); }
+
+/* Selaus */
+.navrow { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.navrow .btn.icon { border: 0; border-radius: 0; background: transparent; padding: 8px 12px; justify-content: center; }
+.navrow .btn.icon + .btn.icon { border-left: 1px solid var(--line); }
+.navrow .btn.icon:hover:not(:disabled) { background: var(--bg); }
+.navrow .btn.icon.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.icon svg { display: block; }
+/* Sijaintiteksti täyttää vapaan tilan: sen pituus ei siirrä painikkeita */
+.navpos {
+  flex: 1 1 0; min-width: 0;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font: 500 .9rem var(--font-mono);
+}
+.navpos .navtag { flex: none; }
+.navpos small { color: var(--muted); font-family: var(--font-body); font-weight: 400; }
+.navtag {
+  font: 600 .72rem/1 var(--font-body); text-transform: uppercase; letter-spacing: .06em;
+  padding: 4px 7px; border-radius: 5px; background: var(--q-best); color: var(--badge-ink);
+}
+.varbox {
+  display: grid; gap: 8px; margin-top: 8px;
+  padding: 10px 12px; border-radius: 8px; border: 1px dashed var(--q-best); background: var(--surface);
+}
+.var-head { font-size: .88rem; }
+.var-head span { color: var(--muted); }
+.var-moves {
+  display: flex; flex-wrap: wrap; gap: 2px 6px; align-items: baseline;
+  font: 400 .9rem/1.6 var(--font-mono);
+}
+.var-moves .n { color: var(--muted); }
+.var-moves .mv { border: 0; background: none; font: inherit; padding: 0 4px; border-radius: 4px; }
+.var-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Materiaali ja arvot */
+.mat {
+  display: flex; align-items: center; gap: 6px 10px; flex-wrap: nowrap; overflow: hidden;
+  padding-left: 22px; height: 26px; font-size: .88rem;
+}
+.mat .caps { flex-wrap: nowrap; overflow: hidden; }
+.mat .who { font-weight: 600; }
+.mat .who small { font-weight: 400; color: var(--muted); }
+.mat .caps { display: flex; flex-wrap: wrap; align-items: center; }
+.mat .caps .piece { font-size: 1.2rem; transform: none; margin-right: -2px; }
+.mat .caps .gap { width: 6px; }
+.mat .adv { font: 500 .88rem var(--font-mono); font-variant-numeric: tabular-nums; color: var(--accent); }
+/* Nappuloiden arvot yhdellä rivillä suositusten alla */
+.values {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; margin: 8px 0 0;
+  font: 500 .88rem var(--font-mono); font-variant-numeric: tabular-nums;
+}
+.values > span { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+.values .piece { font-size: 1.2rem; transform: none; }
+.values .vlabel { font: 600 .68rem var(--font-body); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.values .vnote { font: 400 .78rem var(--font-body); color: var(--muted); white-space: normal; }
+
+/* Harvoin käytetyt työkalut avattavina osioina */
+.tools { display: grid; border-top: 1px solid var(--line); }
+.fold { border-bottom: 1px solid var(--line); }
+.fold > summary {
+  list-style: none; cursor: pointer; padding: 10px 0;
+  display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: .9rem;
+}
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::before {
+  content: ""; width: 6px; height: 6px; flex: none; margin-left: 2px;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg); transition: transform .15s ease;
+}
+.fold[open] > summary::before { transform: rotate(45deg); }
+.fold > summary:hover { color: var(--accent); }
+.fold-body { display: grid; gap: 10px; padding: 2px 0 14px; }
+.fold-body .msg { margin: 0; }
+.fold-body .msg:empty { display: none; }
+.fold-body > .lbl { font-size: .85rem; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .fold > summary::before { transition: none; } }
+
+.top-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+/* Selkokielisen arvion rivi on aina varattu, vaikka arviota ei vielä ole */
+.verdict {
+  margin: 0 0 8px; font-weight: 600; font-size: 1rem; height: 1.5em;
+  display: flex; gap: 10px; align-items: baseline;
+  white-space: nowrap; overflow: hidden;
+}
+.verdict[hidden] { display: flex !important; visibility: hidden; }
+.verdict small { overflow: hidden; text-overflow: ellipsis; }
+.verdict small { font: 400 .82rem var(--font-body); color: var(--muted); }
+.linkbtn {
+  border: 0; background: none; padding: 0; color: var(--accent);
+  font-weight: 600; text-decoration: underline; text-underline-offset: 2px;
+}
+
+/* Ohje */
+.help {
+  position: fixed; inset: 0; z-index: 50;
+  background: var(--scrim);
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  display: grid; place-items: start center; overflow-y: auto;
+}
+.help-card {
+  width: 100%; max-width: 680px;
+  background: var(--surface); color: var(--ink);
+  border-radius: 12px; border: 1px solid var(--line);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .3);
+}
+.help-head {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 16px 20px; background: var(--surface); border-bottom: 1px solid var(--line);
+  border-radius: 12px 12px 0 0;
+}
+.help-head h2 { margin: 0; font: 800 1.2rem/1.2 var(--font-display); text-wrap: balance; }
+.help-body { padding: 4px 20px 24px; display: grid; gap: 4px; }
+.help-body h3 {
+  margin: 18px 0 6px; font: 700 1rem/1.3 var(--font-display);
+  display: flex; align-items: center; gap: 10px;
+}
+.help-body h3 .tag {
+  font: 500 .8rem/1 var(--font-mono); padding: 4px 7px; border-radius: 5px;
+  background: var(--bar-white); color: var(--bar-black); box-shadow: inset 0 0 0 1px var(--line);
+}
+.help-body p, .help-body li { margin: 0 0 6px; max-width: 64ch; }
+.help-body ul { margin: 0 0 6px; padding-left: 20px; }
+.help-body code, .help-body .mono { font: 500 .9em var(--font-mono); }
+.tbl-wrap { overflow-x: auto; margin: 4px 0 8px; }
+.help-body table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+.help-body th, .help-body td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+.help-body th { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+.help-body td:first-child { font-family: var(--font-mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.example {
+  display: grid; grid-template-columns: 6px 64px minmax(0, 1fr); gap: 10px; align-items: center;
+  padding: 10px 12px 10px 0; border: 1px solid var(--line); border-radius: 8px; margin: 6px 0 4px;
+  overflow: hidden; background: var(--bg);
+}
+.example .chip { align-self: stretch; background: var(--a1); }
+.example .ev { font: 500 .95rem/1 var(--font-mono); padding: 6px 0; text-align: center; border-radius: 5px; background: var(--bar-white); color: var(--bar-black); box-shadow: inset 0 0 0 1px var(--line); }
+.example .pv { font: 400 .88rem/1.4 var(--font-mono); }
+.example .pv b { font-weight: 500; }
+.callouts { display: grid; gap: 4px; margin: 0 0 8px; padding: 0; list-style: none; }
+.callouts li { display: grid; grid-template-columns: 22px 1fr; gap: 6px; }
+.callouts .num {
+  width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+  font: 600 .72rem/20px var(--font-body); text-align: center;
+}
+
+/* Leveällä näytöllä lauta pysyy näkyvissä, kun paneelia selataan */
+@media (min-width: 761px) and (min-height: 640px) {
+  .board-col { position: sticky; top: calc(12px + env(safe-area-inset-top, 0px)); }
+}
+
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .pill { width: 11.5rem; } /* tilarivi, aloittelijakytkin ja Ohje mahtuvat samalle riville */
+  /* puhelimessa lauta, ohjaimet ja välilehti mahtuvat yhdelle näytölle */
+  body { padding-block: 10px 0; }
+  .app { gap: 10px; }
+  h1 { font-size: 1.15rem; }
+  header.top { gap: 6px 12px; }
+  .board-col { gap: 6px; }
+  .tab { padding: 8px 4px 7px; }
+  .tabbody { padding-block: 12px 10px; }
+  h1 { font-size: 1.35rem; }
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <h1>Shakki<span>valmentaja</span></h1>
+    <div class="top-actions">
+      <div class="pill" id="status" data-state="idle"><i></i><span id="statusText">Ladataan moottoria…</span></div>
+      <label class="bswitch" title="Selittää siirrot sanoin, varoittaa uhatuista nappuloista ja piilottaa numerot">
+        <input type="checkbox" id="beginnerToggle"> Aloittelijatila
+      </label>
+      <button class="linkbtn" id="helpBtn" type="button" aria-haspopup="dialog">Ohje</button>
+    </div>
+  </header>
+
+  <section class="board-col" aria-label="Lauta">
+    <div class="mat" id="matTop"></div>
+    <div class="board-row">
+      <div class="evalbar" id="evalbar" aria-hidden="true"><div class="fill" id="evalfill"></div></div>
+      <div class="board-wrap" id="boardWrap">
+        <div class="board" id="board" role="grid" aria-label="Shakkilauta"></div>
+        <svg class="arrows" id="arrows" viewBox="0 0 8 8" aria-hidden="true"></svg>
+        <div class="promo" id="promo" hidden><div class="box" id="promoBox"></div></div>
+      </div>
+    </div>
+    <div class="mat" id="matBottom"></div>
+    <div class="coach" id="coach" hidden aria-live="polite"></div>
+    <div class="controls">
+    <div class="navrow" role="group" aria-label="Selaa peliä">
+      <button class="btn icon" id="navStart" type="button" aria-label="Alkuasemaan" title="Alkuasemaan (Home)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3.5 3v10M12 3 7 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn icon" id="navPrev" type="button" aria-label="Edellinen siirto" title="Edellinen siirto (←)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn icon" id="navNext" type="button" aria-label="Seuraava siirto" title="Seuraava siirto (→)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn icon" id="navEnd" type="button" aria-label="Viimeisimpään siirtoon" title="Viimeisimpään siirtoon (End)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 3l5 5-5 5M12.5 3v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <span class="navpos" id="navPos" aria-live="polite"></span>
+    <div class="toolbar">
+      <button class="btn icon quiet" id="undoBtn" type="button" aria-label="Peru siirto" title="Peru siirto">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 3 2.5 6.5 6 10M3 6.5h6.5a3.5 3.5 0 0 1 0 7H7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn icon quiet" id="flipBtn" type="button" aria-label="Käännä lauta" title="Käännä lauta (F)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M5 13V3M2.5 5.5 5 3l2.5 2.5M11 3v10M8.5 10.5 11 13l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="tabs" role="tablist" aria-label="Paneelin näkymät">
+      <button class="tab" role="tab" type="button" data-t="now" aria-selected="true">Suositus</button>
+      <button class="tab" role="tab" type="button" data-t="moves" aria-selected="false">Siirrot</button>
+      <button class="tab" role="tab" type="button" data-t="ana" aria-selected="false">Analyysi</button>
+      <button class="tab" role="tab" type="button" data-t="more" aria-selected="false">Lisää</button>
+    </div>
+    <div class="tabbody" id="tabBody" role="tabpanel">
+    <section class="section live-play" id="playSec" data-tab="now" hidden>
+      <div class="play" id="playLive">
+        <div class="vs" id="playVs"></div>
+        <p class="pstate" id="playState"></p>
+        <p class="hint" id="playNote" hidden></p>
+        <div class="play-actions" id="playActions"></div>
+      </div>
+      <p class="msg" id="playMsg"></p>
+    </section>
+
+    <section class="section" data-tab="now">
+      <h2>Moottorin suositukset</h2>
+      <p class="verdict" id="verdict" hidden></p>
+      <div class="lines" id="lines"></div>
+      <p class="hint"><button class="linkbtn" type="button" data-help>Mitä luvut tarkoittavat?</button></p>
+    </section>
+
+    <section class="section" data-tab="now">
+      <h2>Siirron arvio</h2>
+      <div class="review empty" id="review">Tee siirto, niin näet tässä, kuinka hyvä se oli.</div>
+    </section>
+
+    <section class="section" data-tab="moves">
+      <h2>Siirrot</h2>
+      <div class="moves" id="moves"></div>
+      <div class="varbox" id="varBox" hidden>
+        <div class="var-head"><b>Sivuvariantti</b> <span id="varFrom"></span></div>
+        <div class="var-moves" id="varMoves"></div>
+        <div class="var-actions">
+          <button class="btn" id="varExit" type="button">Palaa peliin</button>
+          <button class="btn quiet" id="varPromote" type="button">Korvaa peli tällä</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-tab="ana">
+      <h2>Pelin analyysi</h2>
+      <p class="ana-empty" id="anaEmpty">Analyysi näkyy, kun pelissä on siirtoja. Voit myös tuoda valmiin pelin kohdasta "Tuo tai vie peli".</p>
+      <div class="ana" id="anaBody" hidden>
+        <div class="ginfo" id="gameInfo" hidden></div>
+        <div class="graph-wrap" id="graphWrap">
+          <svg id="graph" role="img" aria-label="Arviokäyrä koko pelistä"></svg>
+          <div class="gcross" id="gcross" hidden></div>
+          <div class="gtip" id="gtip" hidden></div>
+        </div>
+        <div class="progress" id="anaProgress" hidden>
+          <div class="pbar"><i id="anaBar"></i></div>
+          <span id="anaText"></span>
+        </div>
+        <div class="tbl-scroll"><table class="stats" id="pcards"></table></div>
+        <h3 class="subh">Käännekohdat</h3>
+        <div class="rows" id="turns"></div>
+      </div>
+    </section>
+
+    <div class="tools" data-tab="more">
+      <div class="tool-actions">
+        <button class="btn" id="newBtn" type="button">Uusi peli</button>
+        <span class="hint">Tyhjentää laudan alkuasemaan.</span>
+      </div>
+      <p class="values" aria-label="Nappuloiden arvot sotilaina">
+        <span class="vlabel">Arvot</span>
+        <span><span class="piece w">♟&#xFE0E;</span>1</span>
+        <span><span class="piece w">♞&#xFE0E;</span>3</span>
+        <span><span class="piece w">♝&#xFE0E;</span>3</span>
+        <span><span class="piece w">♜&#xFE0E;</span>5</span>
+        <span><span class="piece w">♛&#xFE0E;</span>9</span>
+        <span class="vnote">sotilaina, sama yksikkö kuin arviossa</span>
+      </p>
+      <details class="fold" id="foldPlay">
+        <summary>Pelaa konetta vastaan</summary>
+        <div class="fold-body play" id="playSetup">
+          <div class="seg" id="playColor" role="group" aria-label="Oma väri">
+            <button type="button" data-v="w" aria-pressed="true">Valkeilla</button>
+            <button type="button" data-v="b" aria-pressed="false">Mustilla</button>
+            <button type="button" data-v="r" aria-pressed="false">Arvo</button>
+          </div>
+          <div class="field">
+            <label for="playLevel">Vastustajan taso <span class="lvlname" id="playLevelName">Satunnainen pelaaja</span></label>
+            <div class="range"><input type="range" id="playLevel" min="1" max="8" step="1" value="3"><output id="playLevelOut">3</output></div>
+          </div>
+          <div><button class="btn primary" id="playStart" type="button">Aloita peli</button></div>
+        </div>
+      </details>
+
+      <details class="fold" id="foldIO">
+        <summary>Hae tai tuo peli</summary>
+        <div class="fold-body">
+          <div class="fetch" id="fetchBox">
+            <span class="lbl">Omat pelit</span>
+            <div class="seg" id="srcSeg" role="group" aria-label="Palvelu">
+              <button type="button" data-v="lichess" aria-pressed="true">Lichess</button>
+              <button type="button" data-v="chesscom" aria-pressed="false">Chess.com</button>
+            </div>
+            <form class="fen" id="fetchForm">
+              <input id="userInput" type="text" placeholder="Käyttäjänimi" autocomplete="username" autocapitalize="none" spellcheck="false" aria-label="Käyttäjänimi">
+              <button class="btn primary" id="fetchBtn" type="submit">Hae pelit</button>
+            </form>
+            <p class="msg" id="fetchMsg"></p>
+            <div class="rows glist" id="gameList" hidden></div>
+          </div>
+          <p class="hint" id="fetchOff" hidden>Omien pelien haku Lichessistä ja Chess.comista toimii sovellusversiossa osoitteessa shakkivalmentaja.web.app.</p>
+          <span class="lbl adv">PGN-teksti tai -tiedosto</span>
+          <textarea id="pgnInput" class="pgn" rows="3" spellcheck="false" autocomplete="off" aria-label="PGN-teksti" placeholder="Liitä peli PGN-muodossa, esim. 1. e4 e5 2. Nf3 Nc6 …"></textarea>
+          <div class="fen">
+            <button class="btn primary" id="importPgn" type="button">Tuo peli</button>
+            <label class="btn" for="pgnFile">Valitse tiedosto</label>
+            <input class="vh" type="file" id="pgnFile" accept=".pgn,.txt,application/x-chess-pgn,text/plain">
+            <button class="btn quiet" id="copyPgn" type="button">Kopioi PGN</button>
+          </div>
+          <p class="msg" id="pgnMsg"></p>
+          <label class="lbl adv" for="fenInput">Asema (FEN)</label>
+          <div class="fen adv">
+            <input id="fenInput" type="text" spellcheck="false" autocomplete="off">
+            <button class="btn" id="loadFen" type="button">Lataa</button>
+            <button class="btn quiet" id="copyFen" type="button">Kopioi</button>
+          </div>
+          <p class="msg adv" id="fenMsg"></p>
+        </div>
+      </details>
+
+      <details class="fold" id="foldSettings">
+        <summary>Asetukset</summary>
+        <div class="fold-body settings">
+          <div class="field">
+            <span class="lbl">Pelaan</span>
+            <div class="seg" id="colorSeg">
+              <button type="button" data-v="w" aria-pressed="true">Valkeilla</button>
+              <button type="button" data-v="b" aria-pressed="false">Mustilla</button>
+            </div>
+          </div>
+          <label class="check"><input type="checkbox" id="onlyMine"> Näytä suositukset vain omalla vuorollani</label>
+          <div class="field adv">
+            <label for="depth">Laskentasyvyys (puolisiirtoja)</label>
+            <div class="range"><input type="range" id="depth" min="8" max="22" step="1" value="16"><output id="depthOut">16</output></div>
+          </div>
+          <div class="field adv">
+            <span class="lbl">Vaihtoehtoja</span>
+            <div class="seg" id="pvSeg">
+              <button type="button" data-v="1" aria-pressed="false">1</button>
+              <button type="button" data-v="2" aria-pressed="false">2</button>
+              <button type="button" data-v="3" aria-pressed="true">3</button>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="more-foot" data-tab="more">
+    <p class="note"><span class="engine-name">Stockfish 10</span> laskee suoraan selaimessasi. Merkinnät: K kuningas, D daami, T torni, L lähetti, R ratsu. Käytä analyysiin ja harjoitteluun, älä käynnissä oleviin peleihin muita ihmisiä vastaan.</p>
+    </div>
+    </div>
+  </aside>
+</div>
+
+<div class="help" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="help-card">
+    <div class="help-head">
+      <h2 id="helpTitle">Mitä luvut tarkoittavat?</h2>
+      <button class="btn" id="helpClose" type="button">Sulje</button>
+    </div>
+    <div class="help-body">
+
+      <h3><span class="tag">+0.85</span> Arvio</h3>
+      <p>Arvio kertoo, kumpi on moottorin mielestä paremmassa asemassa ja kuinka paljon. Yksikkönä on <b>sotilas</b>: +1.00 tarkoittaa suunnilleen yhden ylimääräisen sotilaan etua.</p>
+      <ul>
+        <li><b>Plus (+)</b> tarkoittaa, että valkealla on etu. <b>Miinus (−)</b> tarkoittaa, että mustalla on etu.</li>
+        <li>Arvio on <b>aina valkean näkökulmasta</b>, vaikka pelaisit mustilla. Mustilla pelatessa toivot siis miinusmerkkistä lukua.</li>
+        <li>Etu voi olla muutakin kuin materiaalia: parempi kuninkaan suoja, aktiivisemmat nappulat tai vahva sotilasrakenne.</li>
+      </ul>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Arvio</th><th>Merkitys</th></tr></thead>
+          <tbody>
+            <tr><td>0.00 – ±0.30</td><td>Tasainen asema</td></tr>
+            <tr><td>±0.30 – ±0.70</td><td>Pieni etu, peli on vielä täysin auki</td></tr>
+            <tr><td>±0.70 – ±1.50</td><td>Selvä etu</td></tr>
+            <tr><td>±1.50 – ±3.00</td><td>Suuri etu, yleensä voittava hyvällä pelillä</td></tr>
+            <tr><td>yli ±3.00</td><td>Voittava asema</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Nappuloiden suuntaa-antavat arvot sotilaina: sotilas 1, ratsu ja lähetti noin 3, torni 5, daami 9. Arvot näkyvät myös Lisää-välilehdellä. Jos arvio putoaa yhden siirron jälkeen esimerkiksi +0.5:stä −2.5:een, siirto menetti noin lähetin verran.</p>
+
+      <h3><span class="tag">#3</span> Matti</h3>
+      <p><span class="mono">#3</span> tarkoittaa, että <b>valkea</b> tekee pakotetun matin 3 siirrossa. <span class="mono">#-3</span> tarkoittaa, että <b>musta</b> tekee matin 3 siirrossa. Numero on oman puolen siirtojen määrä, ei puolisiirtojen.</p>
+
+      <h3><span class="tag">+3</span> Materiaali laudan ylä- ja alapuolella</h3>
+      <p>Pelaajan nimen vieressä ovat nappulat, jotka hän on lyönyt <b>enemmän kuin vastustaja</b>. Vaihdetut nappulat kumoavat toisensa eivätkä näy. Luku, esim. <span class="mono">+3</span>, on materiaaliero nappuloiden arvoilla laskettuna.</p>
+      <p>Materiaaliero ja moottorin arvio ovat eri asioita. Jos materiaalia on +3 mutta arvio on vain +0.4, vastustajalla on vastapainoksi jotain muuta, esimerkiksi hyökkäys kuningasta vastaan.</p>
+
+      <h3>Arviopalkki laudan vieressä</h3>
+      <p>Palkki näyttää saman arvion kuvana. Valkoinen osa on valkean etu ja tumma osa mustan. Tasaisessa asemassa palkki on puolillaan. Mitä isompi etu, sitä lähempänä palkki on reunaa. Palkki ei ole lineaarinen, joten +1 näkyy selvästi mutta +8 ja +15 näyttävät lähes samalta.</p>
+
+      <h3>Suositusrivi</h3>
+      <div class="example" aria-hidden="true">
+        <span class="chip"></span>
+        <span class="ev">+0.85</span>
+        <span class="pv">12. <b>Rf3</b> e5 13. d4 Rc6 14. Lb5</span>
+      </div>
+      <ul class="callouts">
+        <li><span class="num">1</span><span><b>+0.85</b>: arvio sen jälkeen, kun tämä linja on pelattu.</span></li>
+        <li><span class="num">2</span><span><b>12.</b> on siirron numero. <span class="mono">12…</span> (kolme pistettä) tarkoittaa, että linja alkaa mustan siirrolla.</span></li>
+        <li><span class="num">3</span><span><b>Lihavoitu siirto</b> (Rf3) on se, jota moottori suosittelee nyt pelattavaksi.</span></li>
+        <li><span class="num">4</span><span>Loput siirrot ovat <b>odotettu jatko</b>: moottorin arvio molempien parhaista vastauksista. Pitkä jatko on vain suuntaa antava.</span></li>
+      </ul>
+      <p>Värit vastaavat laudan nuolia: <span style="color:var(--a1)">■</span> oranssi on paras siirto, <span style="color:var(--a2)">■</span> sininen toiseksi paras ja <span style="color:var(--a3)">■</span> violetti kolmanneksi paras.</p>
+      <p><b>Vertaa rivien arvioita keskenään.</b> Jos paras on +0.80 ja toinen +0.10, asemassa on vain yksi hyvä siirto, ja se kannattaa löytää. Jos kaikki kolme ovat lähes samat, voit valita niistä mieleisesi.</p>
+
+      <h3><span class="tag">??</span> Siirron arvio</h3>
+      <p>Jokainen siirto saa arvion sen mukaan, kuinka paljon siirtäjän <b>voittomahdollisuudet heikkenivät</b>. Siksi +8 → +6 ei ole virhe, koska peli on yhä voitettu, mutta +0.5 → −1.5 on.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Merkki</th><th>Merkitys</th></tr></thead>
+          <tbody>
+            <tr><td><span class="q blunder">??</span> Moka</td><td>Ratkaiseva virhe, esim. nappula hukkaan. Tasaisessa asemassa arvio putoaa noin <span class="thr" data-w="0.3">2,4</span> tai enemmän.</td></tr>
+            <tr><td><span class="q mistake">?</span> Virhe</td><td>Selvä heikennys. Tasaisessa asemassa arvio putoaa noin <span class="thr" data-w="0.2">1,6</span>.</td></tr>
+            <tr><td><span class="q inacc">?!</span> Epätarkkuus</td><td>Pieni heikennys. Tasaisessa asemassa arvio putoaa noin <span class="thr" data-w="0.1">0,8</span>.</td></tr>
+            <tr><td>Hyvä siirto</td><td>Ei merkittävää heikennystä, vaikka moottorilla olisi ollut eri ykkösvaihtoehto.</td></tr>
+            <tr><td>Paras siirto</td><td>Sama siirto, jota moottori suositteli.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li>Merkit näkyvät myös siirtolistassa. Napauta mitä tahansa siirtoa, niin lauta siirtyy siihen asemaan ja kortti näyttää siirron arvion.</li>
+        <li>Kun laudalla on asema heti oman virheesi jälkeen, parempi siirto näkyy <b style="color:var(--q-best)">turkoosina katkoviivanuolena</b>.</li>
+        <li>Arvio tarvitsee moottorin laskelman sekä ennen siirtoa että sen jälkeen, joten merkki ilmestyy hetken viiveellä. Aiemmat asemat lasketaan taustalla syvyyteen 12.</li>
+        <li class="old-engine">Tämä versio käyttää vanhempaa Stockfish 10 -moottoria, joka antaa hieman suurempia lukuja kuin uudemmat moottorit, esimerkiksi Lichessin analyysi. Rajat on mitoitettu sen mukaan, mutta yksittäinen merkintä voi silti poiketa Lichessistä yhden pykälän verran. Sovellusversio osoitteessa shakkivalmentaja.web.app käyttää Stockfish 19:ää.</li>
+        <li>Yhteenveto kertoo kummankin pelaajan mokat, virheet ja epätarkkuudet koko pelistä.</li>
+        <li>Jos "Vain omalla vuorollani" on päällä, moottori laskee silti taustalla, jotta siirtosi voidaan arvioida. Suosituksia ja nuolia ei kuitenkaan näytetä vastustajan vuorolla.</li>
+      </ul>
+
+      <h3>Näkymät</h3>
+      <p>Laudan alla, tietokoneella sen vieressä, on neljä välilehteä:</p>
+      <ul>
+        <li><b>Suositus:</b> moottorin paras siirto, tilanne sanoin ja juuri tehdyn siirron arvio. Pelissä konetta vastaan myös pelin tilanne. Tietokoneella tällä välilehdellä on myös siirtolista.</li>
+        <li><b>Siirrot:</b> pelin siirrot ja sivuvariantit. Napauta siirtoa, niin lauta siirtyy siihen asemaan.</li>
+        <li><b>Analyysi:</b> arviokäyrä, tarkkuus ja käännekohdat. Tuotu tai haettu peli avautuu tänne.</li>
+        <li><b>Lisää:</b> uusi peli, peli konetta vastaan, pelien haku ja tuonti, asetukset ja nappuloiden arvot.</li>
+      </ul>
+      <p>Laudan alla ovat selauspainikkeet sekä siirron peruminen ja laudan kääntö.</p>
+
+      <h3>Aloittelijatila</h3>
+      <p>Kytke päälle otsikkorivin kytkimestä <b>Aloittelijatila</b>. Se on tarkoitettu shakkiin tutustumiseen:</p>
+      <ul>
+        <li><b>Nappulan liikkeet:</b> kun napautat nappulaa, laudan alla kerrotaan, miten se liikkuu ja montako laillista siirtoa sillä on. Pisteet laudalla näyttävät ruudut, joihin voit siirtää.</li>
+        <li><b>Vaarat:</b> punainen huutomerkki nappulan kulmassa tarkoittaa, että vastustaja voi lyödä sen. Joko mikään ei suojaa sitä, tai sitä uhkaa halvempi nappula. Laudan alla kerrotaan, mikä nappula on vaarassa.</li>
+        <li><b>Siirrot sanoin:</b> moottorin suositus kerrotaan selkokielellä, esim. "Ratsu f3 → e5, lyö sotilaan, shakki". Virheen kohdalla kerrotaan, mitä vastustaja voi sen jälkeen tehdä.</li>
+        <li><b>Vähemmän numeroita:</b> arvioluvut, laskentasyvyys ja FEN-kenttä piilotetaan. Tilanne kerrotaan sanoin, esim. "Valkealla selvä etu".</li>
+      </ul>
+      <p>Kun shakki alkaa tuntua tutulta, kytke tila pois, niin näet kaikki luvut ja vaihtoehdot.</p>
+
+      <h3>Omien pelien haku</h3>
+      <ul>
+        <li>Avaa Lisää-välilehdeltä <b>Hae tai tuo peli</b>, valitse Lichess tai Chess.com, kirjoita käyttäjänimesi ja paina <b>Hae pelit</b>. Näet 20 viimeisintä peliäsi.</li>
+        <li>Napauta peliä, niin se avautuu analysoitavaksi. Sovellus tunnistaa nimestäsi, kummilla väreillä pelasit, ja kääntää laudan sen mukaan.</li>
+        <li>Haetaan vain tavallisen shakin pelit. Muunnelmat, kuten Chess960, ohitetaan. Käyttäjänimi muistetaan tällä laitteella.</li>
+        <li>Haku toimii sovellusversiossa osoitteessa shakkivalmentaja.web.app.</li>
+      </ul>
+
+      <h3>Peli konetta vastaan</h3>
+      <ul>
+        <li>Valitse Lisää-välilehden kohdassa <b>Pelaa konetta vastaan</b> väri ja vastustajan taso, ja paina <b>Aloita peli</b>. Kone vastaa siirtoihisi automaattisesti.</li>
+        <li>Tasoja on kahdeksan. Taso 1 tekee paljon virheitä ja sopii aloittelijalle, taso 8 pelaa täydellä voimalla. Tasot ovat suuntaa antavia, joten aloita matalalta ja nosta tasoa, kun voitat helposti.</li>
+        <li>Pelin aikana moottorin suositukset, nuolet, arviopalkki ja siirtojen arviot ovat piilossa, jotta peli on oikeaa harjoittelua. <b>Vihje</b> näyttää parhaan siirron nuolena, ja käytetyt vihjeet lasketaan.</li>
+        <li><b>Peru siirto</b> peruu oman siirtosi ja koneen vastauksen. <b>Luovuta</b> päättää pelin, ja se pitää vahvistaa.</li>
+        <li>Kun peli päättyy, analyysi avautuu: siirtojen arviot, arviokäyrä, tarkkuus ja käännekohdat. Moottori on arvioinut siirtoja jo pelin aikana, joten analyysi on yleensä heti valmis.</li>
+        <li>Keskeneräinen peli säilyy, vaikka suljet sovelluksen. <b>Lopeta pelitila</b> palauttaa tavallisen analyysilaudan.</li>
+      </ul>
+
+      <h3>Pelin analyysi ja PGN-tuonti</h3>
+      <ul>
+        <li><b>Pelin tuonti:</b> kopioi peli PGN-muodossa, avaa Lisää-välilehdeltä "Hae tai tuo peli" ja liitä peli kenttään. Voit myös valita .pgn-tiedoston.
+          <ul>
+            <li>Lichessissä PGN löytyy pelin sivulta kohdasta <i>Jaa ja vie</i>.</li>
+            <li>Chess.comissa se löytyy pelin <i>Jaa</i>-painikkeen takaa välilehdeltä <i>PGN</i>.</li>
+          </ul>
+          Kellonajat ja kommentit ohitetaan. Jos tiedostossa on monta peliä, tuodaan ensimmäinen.</li>
+        <li>Tuonnin jälkeen moottori käy koko pelin läpi, ja edistyminen näkyy palkkina. Analyysi kestää pelin pituudesta ja laitteesta riippuen muutamasta sekunnista pariin minuuttiin.</li>
+        <li><b>Pelasin:</b> jos PGN:ssä on pelaajien nimet, valitse nimesi. Silloin arviot, nuolet ja tekstit "sinun siirtosi" osuvat oikein.</li>
+        <li><b>Arviokäyrä</b> näyttää koko pelin yhdellä silmäyksellä. Valkoinen alue kuvaa valkean etua ja tumma mustan. Mitä lähempänä käyrä on ylä- tai alareunaa, sitä selvempi etu on. Jyrkkä pudotus tarkoittaa virhettä, ja värilliset pisteet merkitsevät epätarkkuuksia, virheitä ja mokia. Napauta käyrää, niin lauta siirtyy siihen kohtaan. Vihreä pystyviiva on laudalla näkyvä kohta.</li>
+        <li><b>Tarkkuus</b> (0–100 %) kertoo, kuinka lähellä moottorin parhaita siirtoja pelaaja pysyi. Laskentatapa on sama kuin Lichessissä, mutta matalamman laskentasyvyyden takia luku on suuntaa antava. Karkeasti yli 90 % on erinomainen, 80–90 % hyvä ja alle 70 % sisältää selviä virheitä.</li>
+        <li><b>Käännekohdat</b> ovat pelin suurimmat virheet ja mokat aikajärjestyksessä. Napauta käännekohtaa, niin näet aseman, siirron arvion ja paremman vaihtoehdon.</li>
+        <li><b>Kopioi PGN</b> kopioi nykyisen pelin, jotta voit viedä sen esimerkiksi Lichessin analyysilaudalle.</li>
+      </ul>
+
+      <h3>Pelin selaaminen ja sivuvariantit</h3>
+      <ul>
+        <li>Napauta siirtoa siirtolistassa, niin lauta näyttää aseman sen siirron jälkeen. Moottori analysoi aina laudalla näkyvää asemaa.</li>
+        <li>Laudan alla olevilla painikkeilla pääset alkuasemaan, edelliseen tai seuraavaan siirtoon ja viimeisimpään siirtoon. Koneella toimivat myös näppäimet ← → Home End, ja F kääntää laudan. Painikkeiden vieressä näkyy, missä kohtaa peliä olet, esim. <span class="mono">14… Lxf2 · 27/40</span>.</li>
+        <li>Jos teet aiemmassa asemassa <b>saman siirron</b> kuin pelissä, siirryt vain eteenpäin. <b>Eri siirto</b> aloittaa <b>sivuvariantin</b>, jolla voit kokeilla, mitä olisi tapahtunut. Varsinainen peli säilyy ennallaan.</li>
+        <li>Sivuvariantti näkyy siirtolistan alla omana laatikkonaan. <b>Palaa peliin</b> poistaa sen ja vie haarautumiskohtaan. <b>Korvaa peli tällä</b> tekee siitä pelin uuden jatkon, ja pelin alkuperäiset siirrot haarautumiskohdan jälkeen poistuvat.</li>
+        <li><b>Peru siirto</b> poistaa näytettävän linjan viimeisen siirron: sivuvariantissa variantin viimeisen siirron, muuten pelin viimeisen siirron.</li>
+        <li>Kun syötät käynnissä olevaa peliä, palaa ensin viimeisimpään siirtoon. Muuten uusi siirto menee sivuvarianttiin.</li>
+      </ul>
+
+      <h3>Tilarivi ylhäällä</h3>
+      <div class="tbl-wrap">
+        <table>
+          <tbody>
+            <tr><td>Laskee · syvyys 12/16</td><td>Moottori on laskenut 12 puolisiirtoa eteenpäin, ja tavoite on 16. Arvio tarkentuu laskennan edetessä, joten luvut voivat vaihdella alussa.</td></tr>
+            <tr><td>Arvioi siirtoja · 3 jäljellä</td><td>Nykyinen asema on laskettu, ja moottori arvioi taustalla pelin aiempia asemia siirtomerkintöjä varten.</td></tr>
+            <tr><td>Valmis · syvyys 16</td><td>Laskenta on valmis, ja arvio on lopullinen tälle asemalle.</td></tr>
+            <tr><td>Vastustajan vuoro</td><td>"Vain omalla vuorollani" on päällä, joten moottori odottaa vastustajan siirtoa.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><b>Puolisiirto</b> on yhden pelaajan yksi siirto. Valkean ja mustan siirto yhdessä ovat siis kaksi puolisiirtoa.</p>
+
+      <h3>Siirtomerkinnät</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Merkki</th><th>Merkitys</th></tr></thead>
+          <tbody>
+            <tr><td>K D T L R</td><td>Kuningas, daami, torni, lähetti, ratsu</td></tr>
+            <tr><td>e4</td><td>Ilman kirjainta: sotilas siirtyy ruutuun e4</td></tr>
+            <tr><td>Rf3</td><td>Ratsu siirtyy ruutuun f3</td></tr>
+            <tr><td>x</td><td>Lyönti, esim. <span class="mono">Lxc6</span> = lähetti lyö ruudussa c6</td></tr>
+            <tr><td>exd5</td><td>e-linjan sotilas lyö ruudussa d5</td></tr>
+            <tr><td>+</td><td>Shakki</td></tr>
+            <tr><td>#</td><td>Matti</td></tr>
+            <tr><td>O-O</td><td>Lyhyt linnoitus (kuninkaan puolelle)</td></tr>
+            <tr><td>O-O-O</td><td>Pitkä linnoitus (daamin puolelle)</td></tr>
+            <tr><td>e8=D</td><td>Sotilas korottuu daamiksi</td></tr>
+            <tr><td>Rbd2</td><td>Kaksi ratsua voi mennä ruutuun d2, b-linjan ratsu menee</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Laudan kirjaimet ja numerot</h3>
+      <p>Kirjaimet <b>a–h</b> ovat pystylinjoja vasemmalta oikealle valkean puolelta katsottuna. Numerot <b>1–8</b> ovat vaakarivejä: rivi 1 on valkean takarivi ja rivi 8 mustan. Jokaisella ruudulla on näin oma nimi, esim. e4.</p>
+
+      <h3>Asetukset</h3>
+      <ul>
+        <li><b>Laskentasyvyys:</b> kuinka monta puolisiirtoa moottori laskee eteenpäin. Suurempi luku on tarkempi mutta hitaampi. Puhelimessa 12–14 on hyvä, koneella 16–20.</li>
+        <li><b>Vaihtoehtoja:</b> kuinka monta parasta siirtoa näytetään (1–3). Yhden vaihtoehdon laskenta on nopein.</li>
+      </ul>
+
+      <h3>FEN</h3>
+      <p>FEN on yksi tekstirivi, joka kuvaa koko aseman. Sillä voi siirtää aseman sovellusten välillä. Esimerkki alkuasemasta:</p>
+      <p class="mono" style="overflow-wrap:anywhere">rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</p>
+      <ul>
+        <li><b>1. osa:</b> nappulat riveittäin rivistä 8 alkaen. Isot kirjaimet ovat valkeita ja pienet mustia. Kirjaimet ovat englanniksi: K kuningas, Q daami, R torni, B lähetti, N ratsu, P sotilas. Numero tarkoittaa tyhjiä ruutuja.</li>
+        <li><b>w / b:</b> siirtovuoro, w valkea ja b musta.</li>
+        <li><b>KQkq:</b> jäljellä olevat linnoitusoikeudet, <b>-</b> jos niitä ei ole.</li>
+        <li><b>-</b> tai ruutu: mahdollinen ohestalyöntiruutu.</li>
+        <li><b>0:</b> puolisiirrot viimeisen lyönnin tai sotilassiirron jälkeen (50 siirron sääntö).</li>
+        <li><b>1:</b> siirron numero.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  const STOCKFISH_URL = "https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js";
+  const STORE_KEY = "shakkivalmentaja.v1";
+  const GLYPH = { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" };
+  const FI = { Q: "D", R: "T", B: "L", N: "R" };
+  const ARROW_COLORS = ["--a1", "--a2", "--a3"];
+  const FILES = "abcdefgh";
+
+  const $ = (id) => document.getElementById(id);
+  const boardEl = $("board"), arrowsEl = $("arrows"), linesEl = $("lines"), movesEl = $("moves");
+
+  const game = new Chess();
+  const isTouch = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+  const state = { myColor: "w", flipped: false, onlyMine: false, depth: isTouch ? 14 : 16, multipv: 3, beginner: false };
+  let selected = null, legalFromSel = [], pendingPromo = null;
+
+  // ---------- Tallennus ----------
+  function save() {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({
+        pgn: game.pgn(), myColor: state.myColor, flipped: state.flipped,
+        onlyMine: state.onlyMine, depth: state.depth, multipv: state.multipv, beginner: state.beginner,
+        play: { active: play.active, level: play.level, human: play.human, pick: play.pick, hints: play.hints }
+      }));
+    } catch (e) { /* ei tallennusta, ei haittaa */ }
+  }
+  function restore() {
+    try {
+      const s = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+      if (!s) return;
+      if (s.pgn) game.load_pgn(s.pgn);
+      Object.assign(state, {
+        myColor: s.myColor === "b" ? "b" : "w",
+        flipped: !!s.flipped,
+        onlyMine: !!s.onlyMine,
+        beginner: !!s.beginner,
+        depth: Math.min(22, Math.max(8, +s.depth || state.depth)),
+        multipv: [1, 2, 3].includes(+s.multipv) ? +s.multipv : 3
+      });
+      if (s.play) {
+        play.active = !!s.play.active;
+        play.level = Math.min(8, Math.max(1, +s.play.level || 3));
+        play.human = s.play.human === "b" ? "b" : "w";
+        play.pick = ["w", "b", "r"].includes(s.play.pick) ? s.play.pick : "w";
+        play.hints = +s.play.hints || 0;
+      }
+    } catch (e) { /* ignore */ }
+  }
+
+  // ---------- Apurit ----------
+  const fiSan = (san) => san.replace(/[QRBN]/g, (c) => FI[c]);
+  const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  function squareXY(sq) {
+    const f = FILES.indexOf(sq[0]), r = +sq[1] - 1;
+    return state.flipped ? { x: 7 - f + 0.5, y: r + 0.5 } : { x: f + 0.5, y: 7 - r + 0.5 };
+  }
+
+  function kingSquare(color) {
+    for (const f of FILES) for (let r = 1; r <= 8; r++) {
+      const p = view.get(f + r);
+      if (p && p.type === "k" && p.color === color) return f + r;
+    }
+    return null;
+  }
+
+  // ---------- Lauta ----------
+  function renderBoard() {
+    const hist = view.history({ verbose: true });
+    const last = hist[hist.length - 1];
+    const checkSq = view.in_check() ? kingSquare(view.turn()) : null;
+    const targets = new Map(legalFromSel.map((m) => [m.to, m]));
+    const ranks = state.flipped ? [1, 2, 3, 4, 5, 6, 7, 8] : [8, 7, 6, 5, 4, 3, 2, 1];
+    const files = state.flipped ? FILES.split("").reverse() : FILES.split("");
+    const dangers = state.beginner ? dangersFor(view.fen(), state.myColor) : new Map();
+
+    const frag = document.createDocumentFragment();
+    ranks.forEach((rank, ri) => {
+      files.forEach((file, fi) => {
+        const sq = file + rank;
+        const el = document.createElement("button");
+        el.type = "button";
+        el.className = "sq";
+        el.dataset.sq = sq;
+        if ((FILES.indexOf(file) + rank) % 2 === 1) el.classList.add("dark");
+        if (last && (last.from === sq || last.to === sq)) el.classList.add("last");
+        if (selected === sq) el.classList.add("sel");
+        if (checkSq === sq) el.classList.add("check");
+        const p = view.get(sq);
+        const warn = dangers.get(sq);
+        if (targets.has(sq)) {
+          el.classList.add("target");
+          if (p || targets.get(sq).flags.includes("e")) el.classList.add("capture");
+        }
+        let label = sq;
+        if (p) {
+          const s = document.createElement("span");
+          s.className = "piece " + p.color;
+          s.textContent = GLYPH[p.type] + "︎";
+          el.appendChild(s);
+          label += " " + (p.color === "w" ? "valkea " : "musta ") + NAME[p.type];
+          if (warn) {
+            const w = document.createElement("span"); w.className = "warn"; w.textContent = "!"; w.setAttribute("aria-hidden", "true");
+            el.appendChild(w);
+            label += ", uhattuna";
+          }
+        }
+        el.setAttribute("aria-label", label);
+        if (fi === 0) {
+          const c = document.createElement("span"); c.className = "coord rank"; c.textContent = rank; el.appendChild(c);
+        }
+        if (ri === 7) {
+          const c = document.createElement("span"); c.className = "coord file"; c.textContent = file; el.appendChild(c);
+        }
+        frag.appendChild(el);
+      });
+    });
+    boardEl.replaceChildren(frag);
+    $("evalbar").classList.toggle("flipped", state.flipped);
+    animatePieces(snapshotPieces());
+    renderMaterial();
+    renderCoach(dangers);
+  }
+
+  // ---------- Aloittelijatila: nappulat, vaarat ja siirrot sanoin ----------
+  const NAME = { p: "sotilas", n: "ratsu", b: "lähetti", r: "torni", q: "daami", k: "kuningas" };
+  const GEN = { p: "sotilaan", n: "ratsun", b: "lähetin", r: "tornin", q: "daamin", k: "kuninkaan" };
+  const MY = { p: "sotilaasi", n: "ratsusi", b: "lähettisi", r: "tornisi", q: "daamisi", k: "kuninkaasi" };
+  const MY_PART = { p: "sotilastasi", n: "ratsuasi", b: "lähettiäsi", r: "torniasi", q: "daamiasi", k: "kuningastasi" };
+  const TRANSL = { q: "daamiksi", r: "torniksi", b: "lähetiksi", n: "ratsuksi" };
+  const PIECE_VALUE = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 100 };
+  const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+  const colorName = (c) => (c === "w" ? "Valkea" : "Musta");
+  const HOW = {
+    p: "Sotilas liikkuu suoraan eteenpäin yhden ruudun, ensimmäisellä siirrollaan halutessaan kaksi. Se lyö vinottain eteenpäin. Viimeisellä rivillä siitä tulee daami tai muu nappula.",
+    n: "Ratsu liikkuu L-muodossa: kaksi ruutua yhteen suuntaan ja yksi sivulle. Ainoana nappulana se hyppää muiden yli.",
+    b: "Lähetti liikkuu vinottain niin pitkälle kuin tie on vapaa. Se pysyy aina saman värisillä ruuduilla.",
+    r: "Torni liikkuu suoraan pysty- tai vaakasuunnassa niin pitkälle kuin tie on vapaa.",
+    q: "Daami liikkuu kuin torni ja lähetti yhdessä: suoraan tai vinottain niin pitkälle kuin tie on vapaa. Se on vahvin nappula.",
+    k: "Kuningas liikkuu yhden ruudun mihin suuntaan tahansa, mutta ei saa siirtyä uhattuun ruutuun."
+  };
+
+  // Asema, jossa vuorossa on annettu väri (ohestalyönti nollataan, jotta asema on aina kelvollinen)
+  function withTurn(fen, color) {
+    const parts = fen.split(" ");
+    parts[1] = color; parts[3] = "-";
+    const c = new Chess();
+    return c.load(parts.join(" ")) ? c : null;
+  }
+
+  // Omat nappulat, jotka vastustaja voi lyödä: suojaamattomat tai halvemman nappulan uhkaamat
+  const dangerCache = new Map();
+  function dangersFor(fen, owner) {
+    const key = fen + "|" + owner;
+    if (dangerCache.has(key)) return dangerCache.get(key);
+    const opp = owner === "w" ? "b" : "w";
+    const out = new Map();
+    const atk = withTurn(fen, opp);
+    if (atk) {
+      const byTarget = new Map();
+      atk.moves({ verbose: true }).forEach((m) => {
+        if (!m.captured || m.color !== opp) return;
+        if (!byTarget.has(m.to)) byTarget.set(m.to, []);
+        byTarget.get(m.to).push(m.piece);
+      });
+      byTarget.forEach((attackers, sq) => {
+        const piece = atk.get(sq);
+        if (!piece || piece.color !== owner || piece.type === "k") return;
+        // suojaako jokin? asetetaan ruutuun vastustajan nappula ja katsotaan, voiko omistaja lyödä sen
+        const def = withTurn(fen, owner);
+        if (!def) return;
+        def.remove(sq);
+        def.put({ type: "n", color: opp }, sq);
+        const defended = def.moves({ verbose: true }).some((m) => m.to === sq && m.captured);
+        const cheapest = attackers.reduce((a, b) => (PIECE_VALUE[a] <= PIECE_VALUE[b] ? a : b));
+        if (!defended || PIECE_VALUE[cheapest] < PIECE_VALUE[piece.type]) {
+          out.set(sq, { type: piece.type, hanging: !defended, by: cheapest });
+        }
+      });
+    }
+    if (dangerCache.size > 200) dangerCache.clear();
+    dangerCache.set(key, out);
+    return out;
+  }
+
+  // Siirto selkokielellä, esim. "Ratsu f3 → e5, lyö sotilaan, shakki"
+  function describeMove(fen, uci) {
+    const c = new Chess(fen);
+    const m = c.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] });
+    if (!m) return { san: uci, text: "" };
+    const parts = [];
+    if (m.flags.includes("k") || m.flags.includes("q")) parts.push("linnoitus " + (m.flags.includes("k") ? "lyhyelle puolelle" : "pitkälle puolelle") + " – kuningas turvaan");
+    else parts.push(cap(NAME[m.piece]) + " " + m.from + " → " + m.to);
+    if (m.captured) parts.push("lyö " + GEN[m.captured]);
+    if (m.promotion) parts.push("korottuu " + TRANSL[m.promotion]);
+    if (c.in_checkmate()) parts.push("matti!");
+    else if (c.in_check()) parts.push("shakki");
+    return { san: fiSan(m.san), text: cap(parts.join(", ")) };
+  }
+
+  function renderCoach(dangers) {
+    const box = $("coach");
+    box.hidden = !state.beginner;
+    if (!state.beginner) return;
+    box.replaceChildren();
+    const add = (...parts) => parts.forEach((p) => box.append(p));
+    const b = (t, cls) => { const e = document.createElement("b"); e.textContent = t; if (cls) e.className = cls; return e; };
+    const turn = view.turn();
+    if (selected) {
+      const p = view.get(selected);
+      if (p) {
+        add(b(cap(NAME[p.type]) + ". "), HOW[p.type] + " ");
+        if (p.type === "k" && legalFromSel.some((m) => m.flags.includes("k") || m.flags.includes("q"))) add("Voit myös linnoittautua: kuningas siirtyy kaksi ruutua tornia kohti. ");
+        add(legalFromSel.length ? "Laillisia siirtoja: " + legalFromSel.length + "." : "Tällä nappulalla ei nyt ole laillisia siirtoja.");
+        if (view.in_check()) add(" Kuningas on shakissa, joten vain shakin poistavat siirrot ovat sallittuja.");
+        if (dangers.get(selected)) add(" ", b("Tämä nappula on vaarassa.", "cwarn"));
+        return;
+      }
+    }
+    if (view.game_over()) {
+      if (view.in_checkmate()) add(b("Matti! "), colorName(turn === "w" ? "b" : "w") + " voitti, koska kuningasta ei voi enää pelastaa.");
+      else add(b("Tasapeli. "), view.in_stalemate() ? "Pattitilanne: vuorossa olevalla ei ole laillisia siirtoja, mutta kuningas ei ole shakissa." : "Peli päättyi tasan.");
+      return;
+    }
+    if (view.in_check()) {
+      add(b("Shakki! ", "cwarn"), turn === state.myColor
+        ? "Kuninkaasi on uhattuna. Siirrä kuningas turvaan, lyö uhkaava nappula tai asetu väliin."
+        : "Vastustajan kuningas on uhattuna, ja sen on seuraavaksi päästävä turvaan.");
+      return;
+    }
+    if (dangers.size) {
+      const list = [...dangers.entries()].sort((x, y) => PIECE_VALUE[y[1].type] - PIECE_VALUE[x[1].type]).slice(0, 2);
+      add(b("Varo: ", "cwarn"));
+      list.forEach(([sq, d], i) => {
+        if (i) add(" ");
+        add(d.hanging
+          ? cap(MY[d.type]) + " ruudussa " + sq + " on suojaamatta, ja vastustaja voi lyödä sen."
+          : "Vastustajan " + NAME[d.by] + " uhkaa " + MY_PART[d.type] + " ruudussa " + sq + ".");
+      });
+      return;
+    }
+    add(b(colorName(turn) + " vuorossa" + (turn === state.myColor ? " (sinä). " : ". ")), "Napauta nappulaa, niin näet, miten se liikkuu.");
+  }
+
+  // ---------- Nappuloiden liike ----------
+  // Lauta piirretään aina kokonaan uudelleen. Piirron jälkeen verrataan edelliseen asemaan ja liu'utetaan
+  // siirtyneet nappulat lähtöruuduista paikoilleen (toimii myös linnoituksessa, korotuksessa ja selatessa).
+  const reduceMotion = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const MOVE_MS = 220;
+  let prevPieces = null, prevFlipped = null;
+
+  function snapshotPieces() {
+    const m = new Map();
+    for (const f of FILES) for (let r = 1; r <= 8; r++) {
+      const p = view.get(f + r);
+      if (p) m.set(f + r, p.color + p.type);
+    }
+    return m;
+  }
+
+  function animatePieces(next) {
+    const prev = prevPieces, sameSide = prevFlipped === state.flipped;
+    prevPieces = next; prevFlipped = state.flipped;
+    if (!prev || !sameSide || reduceMotion || !boardEl.animate) return;
+    const gone = [], came = [];
+    prev.forEach((code, sq) => { if (next.get(sq) !== code) gone.push({ sq, code }); });
+    next.forEach((code, sq) => { if (prev.get(sq) !== code) came.push({ sq, code }); });
+    if (!came.length || came.length > 8) return; // isot hypyt (uusi peli, tuonti) ilman animaatiota
+
+    const coords = (sq) => {
+      const f = FILES.indexOf(sq[0]), r = +sq[1] - 1;
+      return state.flipped ? { x: 7 - f, y: r } : { x: f, y: 7 - r };
+    };
+    const dist = (a, b) => { const p = coords(a), q = coords(b); return Math.hypot(p.x - q.x, p.y - q.y); };
+    const pairs = [];
+    came.forEach((c) => {
+      // sama nappula lähimmästä ruudusta; korotuksessa saman värin sotilas viereiseltä riviltä
+      let best = -1, bestD = Infinity;
+      gone.forEach((g, i) => { if (g.code === c.code) { const d = dist(g.sq, c.sq); if (d < bestD) { bestD = d; best = i; } } });
+      if (best < 0) gone.forEach((g, i) => { if (best < 0 && g.code === c.code[0] + "p" && dist(g.sq, c.sq) < 1.5) best = i; });
+      if (best >= 0) { pairs.push({ from: gone[best].sq, to: c.sq }); gone.splice(best, 1); }
+    });
+
+    const size = boardEl.clientWidth / 8;
+    const square = (sq) => boardEl.querySelector('.sq[data-sq="' + sq + '"]');
+    pairs.forEach(({ from, to }) => {
+      const btn = square(to), piece = btn && btn.querySelector(".piece");
+      if (!piece) return;
+      const a = coords(from), b = coords(to);
+      btn.style.zIndex = "3"; // liikkuva nappula muiden ruutujen ja nuolten yläpuolelle
+      piece.animate(
+        [{ transform: `translate(${(a.x - b.x) * size}px, ${(a.y - b.y) * size}px) translateY(-2%)` }, { transform: "translateY(-2%)" }],
+        { duration: MOVE_MS, easing: "cubic-bezier(.2, .7, .25, 1)" }
+      ).onfinish = () => { btn.style.zIndex = ""; };
+    });
+    // lyödyt nappulat häivytetään pois paikaltaan
+    gone.forEach(({ sq, code }) => {
+      const btn = square(sq);
+      if (!btn) return;
+      const g = document.createElement("span");
+      g.className = "piece ghost " + code[0];
+      g.textContent = GLYPH[code[1]] + "︎";
+      btn.appendChild(g);
+      g.animate([{ opacity: 1 }, { opacity: 0 }], { duration: MOVE_MS, easing: "ease-out" }).onfinish = () => g.remove();
+    });
+  }
+
+  // Materiaali: kumpi on lyönyt enemmän ja kuinka monta pistettä
+  const VALUE = { q: 9, r: 5, b: 3, n: 3, p: 1 };
+  function renderMaterial() {
+    const cnt = { w: { q: 0, r: 0, b: 0, n: 0, p: 0 }, b: { q: 0, r: 0, b: 0, n: 0, p: 0 } };
+    view.board().forEach((row) => row.forEach((p) => { if (p && p.type !== "k") cnt[p.color][p.type]++; }));
+    let score = 0;
+    const extra = { w: [], b: [] };
+    for (const t of ["q", "r", "b", "n", "p"]) {
+      const d = cnt.w[t] - cnt.b[t];
+      score += d * VALUE[t];
+      for (let i = 0; i < Math.abs(d); i++) extra[d > 0 ? "w" : "b"].push(t);
+    }
+    const fill = (el, color) => {
+      const who = document.createElement("span"); who.className = "who";
+      who.textContent = color === "w" ? "Valkea" : "Musta";
+      if (color === state.myColor) { const s = document.createElement("small"); s.textContent = " (sinä)"; who.appendChild(s); }
+      const caps = document.createElement("span"); caps.className = "caps";
+      const opp = color === "w" ? "b" : "w";
+      extra[color].forEach((t, i) => {
+        if (i && extra[color][i - 1] !== t) { const g = document.createElement("span"); g.className = "gap"; caps.appendChild(g); }
+        const s = document.createElement("span"); s.className = "piece " + opp; s.textContent = GLYPH[t] + "︎";
+        caps.appendChild(s);
+      });
+      const parts = [who, caps];
+      const adv = color === "w" ? score : -score;
+      if (adv > 0) {
+        const a = document.createElement("span"); a.className = "adv"; a.textContent = "+" + adv;
+        a.title = "Materiaaliero nappuloiden arvoilla";
+        parts.push(a);
+      }
+      el.replaceChildren(...parts);
+    };
+    const top = state.flipped ? "w" : "b";
+    fill($("matTop"), top);
+    fill($("matBottom"), top === "w" ? "b" : "w");
+  }
+
+  // ---------- Siirtojen arviointi ----------
+  const DEFAULT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+  // Sovellusversio (build.js) käyttää Stockfish 19:ää; artifact Stockfish 10:tä CDN:stä
+  const ENGINE = Object.assign({ name: "Stockfish 10", cpScale: 0.7 }, window.ENGINE_INFO || {});
+  const BG_DEPTH = 12, MIN_REVIEW_DEPTH = 8;
+  const QUALITY = {
+    best: { label: "Paras siirto", mark: "" },
+    good: { label: "Hyvä siirto", mark: "" },
+    inacc: { label: "Epätarkkuus", mark: "?!" },
+    mistake: { label: "Virhe", mark: "?" },
+    blunder: { label: "Moka", mark: "??" }
+  };
+  const BAD = ["inacc", "mistake", "blunder"];
+  const evals = new Map(); // FEN -> { type, v, score, depth, best }, aina valkean näkökulmasta
+  const overChecked = new Set();
+  // ---------- Pelilinja ja selaus ----------
+  // game = varsinainen peli. variation = sivuvariantti, joka haarautuu pelistä kohdassa base (puolisiirtoja alusta).
+  // Aktiivinen linja = peli tai pelin alku + sivuvariantti. viewPly = näytettävä kohta aktiivisella linjalla (null = loppu).
+  let variation = null, viewPly = null;
+  let view = new Chess();
+
+  const startFen = () => game.header().FEN || DEFAULT_FEN;
+  // Pitkässä pelissä historiaa ja asemia kysytään monta kertaa jokaisella päivityksellä. Pelin muutokset
+  // kasvattavat versionumeroa, ja historia lasketaan uudelleen vain silloin, kun peli on oikeasti muuttunut.
+  let gameVer = 0;
+  ["move", "undo", "load", "reset", "load_pgn", "clear"].forEach((k) => {
+    const f = game[k];
+    game[k] = function () { gameVer++; return f.apply(game, arguments); };
+  });
+  const getHeader = game.header;
+  game.header = function () { if (arguments.length) gameVer++; return getHeader.apply(game, arguments); };
+  let mmCache = { ver: -1, val: [] };
+  const mainMoves = () => {
+    if (mmCache.ver !== gameVer) mmCache = { ver: gameVer, val: game.history({ verbose: true }) };
+    return mmCache.val;
+  };
+  function activeMoves() {
+    const main = mainMoves();
+    return variation ? main.slice(0, variation.base).concat(variation.moves) : main;
+  }
+  const curPly = () => (viewPly === null ? activeMoves().length : viewPly);
+
+  // Linjan asemat alusta loppuun; pos[i + 1].move on siirto i. Muutama viimeisin linja pidetään muistissa.
+  const posCache = new Map();
+  function positionsOf(moves) {
+    const start = startFen();
+    const key = start + "|" + moves.map((m) => m.from + m.to + (m.promotion || "")).join(",");
+    const hit = posCache.get(key);
+    if (hit) return hit;
+    const c = new Chess(start);
+    const out = [{ fen: c.fen(), move: null }];
+    for (const m of moves) {
+      c.move({ from: m.from, to: m.to, promotion: m.promotion });
+      out.push({ fen: c.fen(), move: m });
+    }
+    if (posCache.size >= 4) posCache.delete(posCache.keys().next().value);
+    posCache.set(key, out);
+    return out;
+  }
+  const positions = () => positionsOf(activeMoves());
+
+  function rebuildView() {
+    const ms = activeMoves();
+    if (viewPly !== null && viewPly >= ms.length) viewPly = null;
+    const upto = viewPly === null ? ms.length : viewPly;
+    view = new Chess(startFen());
+    for (let i = 0; i < upto; i++) view.move({ from: ms[i].from, to: ms[i].to, promotion: ms[i].promotion });
+  }
+
+  function goTo(ply) {
+    const n = activeMoves().length;
+    ply = Math.max(0, Math.min(n, ply));
+    viewPly = ply === n ? null : ply;
+    selected = null; legalFromSel = [];
+    rebuildView(); renderAll(); analyze();
+  }
+
+  function leaveVariation() {
+    if (!variation) return;
+    const base = variation.base;
+    variation = null;
+    goTo(base);
+  }
+
+  // Sivuvariantti korvaa pelin haarautumiskohdasta eteenpäin
+  function promoteVariation() {
+    if (!variation) return;
+    const moves = activeMoves(), fen = startFen(), headers = Object.assign({}, game.header());
+    if (fen === DEFAULT_FEN) game.reset(); else game.load(fen);
+    // pelaajat ym. tiedot säilyvät; tulos poistetaan, koska peli muuttui
+    Object.keys(headers).forEach((k) => { if (!["SetUp", "FEN", "Result"].includes(k)) game.header(k, headers[k]); });
+    moves.forEach((m) => game.move({ from: m.from, to: m.to, promotion: m.promotion }));
+    variation = null; viewPly = null;
+    save(); goTo(moves.length);
+  }
+
+  function storeEval(fen, l) {
+    const prev = evals.get(fen);
+    if (prev && prev.depth > l.depth) return;
+    evals.set(fen, {
+      type: l.type, v: l.v, depth: l.depth, best: l.pv[0],
+      score: l.type === "mate" ? (l.v > 0 ? 10000 : -10000) : l.v
+    });
+  }
+
+  function evalOf(fen) {
+    if (evals.has(fen)) return evals.get(fen);
+    if (!overChecked.has(fen)) {
+      overChecked.add(fen);
+      const c = new Chess(fen);
+      if (c.in_checkmate()) evals.set(fen, { type: "mate", v: 0, score: c.turn() === "w" ? -10000 : 10000, depth: 99, best: null });
+      else if (c.in_draw()) evals.set(fen, { type: "cp", v: 0, score: 0, depth: 99, best: null });
+    }
+    return evals.get(fen) || null;
+  }
+
+  // Voittomahdollisuus välillä -1…1 (Lichessin kaava). Stockfish 10:n sotilasyksikkö on noin 1,4-kertainen
+  // nykyisiin Stockfish-versioihin verrattuna, joten sen arvot skaalataan kertoimella 0,7 (ENGINE.cpScale).
+  const winChance = (s) => 2 / (1 + Math.exp(-0.00368208 * ENGINE.cpScale * s)) - 1;
+
+  function classify(i, pos) {
+    const b = evalOf(pos[i].fen), a = evalOf(pos[i + 1].fen), m = pos[i + 1].move;
+    if (!b || !a || b.depth < MIN_REVIEW_DEPTH || a.depth < MIN_REVIEW_DEPTH) return null;
+    const loss = (winChance(b.score) - winChance(a.score)) * (m.color === "w" ? 1 : -1);
+    const uci = m.from + m.to + (m.promotion || "");
+    let kind = "good";
+    if (b.best && uci === b.best) kind = "best";
+    else if (loss >= 0.3) kind = "blunder";
+    else if (loss >= 0.2) kind = "mistake";
+    else if (loss >= 0.1) kind = "inacc";
+    return { kind, loss, before: b, after: a, move: m };
+  }
+
+  function sanOf(fen, uci) {
+    const m = new Chess(fen).move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] });
+    return m ? fiSan(m.san) : uci;
+  }
+
+  function moveMarks(pos) {
+    const out = [];
+    for (let i = 0; i < pos.length - 1; i++) { const r = classify(i, pos); out.push(r ? r.kind : ""); }
+    return out;
+  }
+
+  // Katkoviivanuoli: parempi siirto, kun laudalla on asema heti oman virheen jälkeen
+  function reviewArrow() {
+    const ply = curPly();
+    if (!ply) return null;
+    const r = classify(ply - 1, positions());
+    if (!r || !BAD.includes(r.kind) || r.move.color !== state.myColor || !r.before.best) return null;
+    return r.before.best;
+  }
+
+  const moveLabel = (pos, i) => pos[i].fen.split(" ")[5] + (pos[i + 1].move.color === "w" ? ". " : "… ") + fiSan(pos[i + 1].move.san);
+
+  function moveButton(pos, i, marks, line, isCur) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "mv"; b.dataset.ply = i + 1; b.dataset.line = line;
+    b.textContent = fiSan(pos[i + 1].move.san);
+    const q = QUALITY[marks[i]];
+    if (q && q.mark) { const s = document.createElement("span"); s.className = "q " + marks[i]; s.textContent = q.mark; b.appendChild(s); }
+    if (isCur) { b.classList.add("cur"); b.setAttribute("aria-current", "true"); }
+    return b;
+  }
+
+  function movesSignature() {
+    const posMain = positionsOf(mainMoves());
+    if (assistOff()) return ["play", posMain.length, curPly()].join("|");
+    return [moveMarks(posMain).join(","), variation ? moveMarks(positions()).join(",") + "@" + variation.base : "-", curPly(), state.myColor].join("|");
+  }
+
+  let movesSig = "";
+  function renderMoves() {
+    movesSig = movesSignature();
+    const posMain = positionsOf(mainMoves()), n = posMain.length - 1;
+    const marks = assistOff() ? [] : moveMarks(posMain), ply = curPly();
+    const onMain = !variation || ply <= variation.base;
+    movesEl.replaceChildren();
+    if (!n) {
+      const d = document.createElement("div"); d.className = "none";
+      d.textContent = "Ei siirtoja vielä. Napauta nappulaa ja sitten ruutua.";
+      movesEl.appendChild(d);
+    } else {
+      const num = (no) => { const s = document.createElement("span"); s.className = "n"; s.textContent = no + "."; return s; };
+      const mk = (i) => {
+        const b = moveButton(posMain, i, marks, "main", onMain && ply === i + 1);
+        if (variation && i >= variation.base) b.classList.add("off");
+        return b;
+      };
+      const start = posMain[0].fen.split(" ");
+      let no = +start[5] || 1, i = 0;
+      if (start[1] === "b") {
+        const dots = document.createElement("span"); dots.textContent = "…";
+        movesEl.append(num(no++), dots, mk(0)); i = 1;
+      }
+      for (; i < n; i += 2) movesEl.append(num(no++), mk(i), i + 1 < n ? mk(i + 1) : document.createElement("span"));
+      const cur = movesEl.querySelector(".cur");
+      if (cur) {
+        // vieritetään vain siirtolistaa, ei koko sivua
+        const top = cur.offsetTop, bottom = top + cur.offsetHeight;
+        if (top < movesEl.scrollTop) movesEl.scrollTop = top - 8;
+        else if (bottom > movesEl.scrollTop + movesEl.clientHeight) movesEl.scrollTop = bottom - movesEl.clientHeight + 8;
+      } else if (viewPly === null && !variation) movesEl.scrollTop = movesEl.scrollHeight;
+    }
+
+    // Sivuvariantti omana laatikkonaan
+    const box = $("varBox");
+    if (!variation) { box.hidden = true; $("varMoves").replaceChildren(); return; }
+    const pos = positions(), vmarks = assistOff() ? [] : moveMarks(pos);
+    const list = $("varMoves");
+    list.replaceChildren();
+    for (let i = variation.base; i < pos.length - 1; i++) {
+      const white = pos[i + 1].move.color === "w";
+      if (white || i === variation.base) {
+        const s = document.createElement("span"); s.className = "n";
+        s.textContent = pos[i].fen.split(" ")[5] + (white ? "." : "…");
+        list.appendChild(s);
+      }
+      list.appendChild(moveButton(pos, i, vmarks, "var", !onMain && ply === i + 1));
+    }
+    $("varFrom").textContent = variation.base
+      ? "haarautuu siirron " + moveLabel(posMain, variation.base - 1) + " jälkeen"
+      : "haarautuu alkuasemasta";
+    box.hidden = false;
+  }
+  function renderMovesIfChanged() {
+    if (movesSignature() !== movesSig) renderMoves();
+  }
+
+  function onMoveClick(e) {
+    const b = e.target.closest(".mv");
+    if (!b) return;
+    const ply = +b.dataset.ply;
+    // Pelin siirto haarautumiskohdan jälkeen: poistutaan sivuvariantista
+    if (b.dataset.line === "main" && variation && ply > variation.base) variation = null;
+    goTo(ply);
+  }
+  movesEl.addEventListener("click", onMoveClick);
+  $("varMoves").addEventListener("click", onMoveClick);
+  $("varExit").addEventListener("click", leaveVariation);
+
+  let promoteArmed = null;
+  $("varPromote").addEventListener("click", () => {
+    const btn = $("varPromote");
+    const lost = mainMoves().length - variation.base;
+    if (!promoteArmed && lost > 0) {
+      btn.textContent = "Vahvista: " + lost + " pelin siirtoa korvataan";
+      btn.classList.add("warn");
+      promoteArmed = setTimeout(() => { promoteArmed = null; btn.textContent = "Korvaa peli tällä"; btn.classList.remove("warn"); }, 3000);
+      return;
+    }
+    clearTimeout(promoteArmed); promoteArmed = null;
+    btn.textContent = "Korvaa peli tällä"; btn.classList.remove("warn");
+    promoteVariation();
+  });
+
+  // Selauspainikkeet ja nuolinäppäimet
+  $("navStart").addEventListener("click", () => goTo(0));
+  $("navPrev").addEventListener("click", () => goTo(curPly() - 1));
+  $("navNext").addEventListener("click", () => goTo(curPly() + 1));
+  $("navEnd").addEventListener("click", () => goTo(activeMoves().length));
+  document.addEventListener("keydown", (e) => {
+    const t = e.target;
+    if ((t && t.closest && t.closest("input, textarea, select")) || !$("help").hidden || !$("promo").hidden) return;
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const map = { ArrowLeft: -1, ArrowRight: 1 };
+    if (e.key in map) goTo(curPly() + map[e.key]);
+    else if (e.key === "f" || e.key === "F") { state.flipped = !state.flipped; save(); renderBoard(); drawArrows(); }
+    else if (e.key === "Home") goTo(0);
+    else if (e.key === "End") goTo(activeMoves().length);
+    else return;
+    e.preventDefault();
+  });
+
+  function renderNav() {
+    const n = activeMoves().length, ply = curPly();
+    $("navStart").disabled = $("navPrev").disabled = ply === 0;
+    $("navNext").disabled = $("navEnd").disabled = ply === n;
+    $("navEnd").classList.toggle("primary", ply < n);
+    const label = $("navPos");
+    label.replaceChildren();
+    if (variation && ply > variation.base) {
+      const t = document.createElement("span"); t.className = "navtag"; t.textContent = "Sivuvariantti"; label.appendChild(t);
+    }
+    const pos = positions();
+    label.append(ply ? moveLabel(pos, ply - 1) : "Alkuasema");
+    const c = document.createElement("small");
+    c.textContent = ply === n ? (n ? " · viimeisin" : "") : " · " + ply + "/" + n;
+    label.appendChild(c);
+  }
+
+  function renderReview() {
+    const el = $("review");
+    const pos = positions(), n = pos.length - 1, ply = curPly();
+    renderAnalysis();
+    el.replaceChildren();
+    if (assistOff()) {
+      el.className = "review empty";
+      el.textContent = "Siirtojen arviot näkyvät, kun peli päättyy.";
+      return;
+    }
+    if (!n || !ply) {
+      el.className = "review empty";
+      el.textContent = n ? "Alkuasema. Siirry eteenpäin, niin näet siirtojen arviot." : "Tee siirto, niin näet tässä, kuinka hyvä se oli.";
+      return;
+    }
+    el.className = "review";
+    const i = ply - 1;
+    const m = pos[i + 1].move, r = classify(i, pos);
+    const no = pos[i].fen.split(" ")[5];
+
+    const head = document.createElement("div"); head.className = "rv-head";
+    const badge = document.createElement("span");
+    badge.className = "badge " + (r ? r.kind : "pending");
+    badge.textContent = r ? QUALITY[r.kind].label + (QUALITY[r.kind].mark ? " " + QUALITY[r.kind].mark : "") : "Arvioidaan…";
+    const mv = document.createElement("span"); mv.className = "rv-move";
+    mv.textContent = no + (m.color === "w" ? ". " : "… ") + fiSan(m.san);
+    const who = document.createElement("small");
+    who.textContent = m.color === state.myColor ? "sinun siirtosi" : "vastustajan siirto";
+    head.append(badge, mv, who);
+    el.appendChild(head);
+
+    const para = (...parts) => {
+      const p = document.createElement("p");
+      parts.forEach((x) => p.append(x));
+      el.appendChild(p);
+      return p;
+    };
+    const bold = (t) => { const b = document.createElement("b"); b.textContent = t; return b; };
+
+    if (!r) {
+      para("Moottori laskee asemaa ennen siirtoa ja sen jälkeen.");
+    } else {
+      const bestSan = r.before.best ? sanOf(pos[i].fen, r.before.best) : null;
+      if (state.beginner) {
+        const best = r.before.best ? describeMove(pos[i].fen, r.before.best) : null;
+        const reply = r.after.best ? describeMove(pos[i + 1].fen, r.after.best) : null;
+        const mine = m.color === state.myColor;
+        const low = (t) => t.charAt(0).toLowerCase() + t.slice(1);
+        if (r.kind === "best") para(mine ? "Hienoa! Juuri tämän siirron moottorikin olisi valinnut." : "Vastustaja pelasi parhaan siirron.");
+        else if (r.kind === "good") {
+          if (best) para("Hyvä siirto. Moottori olisi pelannut ", bold(best.san), " (" + low(best.text) + "), mutta ero on pieni.");
+          else para("Hyvä siirto.");
+        } else if (mine) {
+          para("Parempi oli ", bold(best ? best.san : "?"), best ? ": " + low(best.text) + "." : ".");
+          if (reply) para("Miksi? Vastustaja voi nyt vastata ", bold(reply.san), ": " + low(reply.text) + ".");
+        } else if (reply) {
+          para("Vastustaja teki virheen. Paras vastauksesi on ", bold(reply.san), ": " + low(reply.text) + ".");
+        }
+        return;
+      }
+      para("Arvio: ", bold(evalText(r.before)), " → ", bold(evalText(r.after)));
+      if (r.kind === "best") {
+        para("Sama siirto, jota moottori olisi suositellut.");
+      } else if (r.kind === "good") {
+        if (bestSan) para("Moottorin ykkösvaihtoehto oli ", bold(bestSan), ", mutta ero on pieni.");
+      } else {
+        // yksi kappale, jotta kortin korkeus pysyy samana siirrosta toiseen
+        const p = para("Parempi oli ", bold(bestSan || "?"), " (" + evalText(r.before) + ").");
+        p.append(m.color === state.myColor ? " Näkyy laudalla katkoviivanuolena." : " Vastustaja heikensi asemaansa – etsi tapa hyödyntää se.");
+      }
+    }
+  }
+
+  // ---------- Pelin analyysi (varsinainen peli) ----------
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  const svgEl = (tag, attrs) => { const e = document.createElementNS(SVG_NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+  const playerName = (color) => {
+    const h = game.header(), name = color === "w" ? h.White : h.Black;
+    return name && name !== "?" ? name : (color === "w" ? "Valkea" : "Musta");
+  };
+
+  // Siirry pelin kohtaan (poistuu sivuvariantista, jos kohta on haarautumisen jälkeen)
+  function goToMain(ply) {
+    if (variation && ply > variation.base) variation = null;
+    goTo(ply);
+  }
+
+  // Tarkkuus 0–100 % (Lichessin kaava), keskiarvo pelaajan siirroista
+  function accuracyOf(pos, color) {
+    const sign = color === "w" ? 1 : -1, accs = [];
+    for (let i = 0; i < pos.length - 1; i++) {
+      if (pos[i + 1].move.color !== color) continue;
+      const b = evalOf(pos[i].fen), a = evalOf(pos[i + 1].fen);
+      if (!b || !a || b.depth < MIN_REVIEW_DEPTH || a.depth < MIN_REVIEW_DEPTH) continue;
+      const drop = Math.max(0, 50 * (winChance(b.score) - winChance(a.score)) * sign);
+      accs.push(Math.min(100, Math.max(0, 103.1668 * Math.exp(-0.04354 * drop) - 3.1669)));
+    }
+    return accs.length ? accs.reduce((s, x) => s + x, 0) / accs.length : null;
+  }
+
+  let anaSig = "";
+  function renderAnalysis() {
+    const pos = positionsOf(mainMoves()), n = pos.length - 1;
+    const evs = pos.map((p) => evalOf(p.fen));
+    const onMain = !variation || curPly() <= variation.base;
+    if (assistOff()) {
+      anaSig = "";
+      $("anaEmpty").textContent = "Analyysi avautuu, kun peli päättyy. Moottori arvioi siirtoja jo taustalla.";
+      $("anaEmpty").hidden = false;
+      $("anaBody").hidden = true;
+      return;
+    }
+    const sig = [evs.map((e) => (e ? e.score + ":" + e.depth : "-")).join(","), curPly(), onMain, state.myColor,
+      $("graphWrap").clientWidth, game.header().White || "", game.header().Black || ""].join("|");
+    if (sig === anaSig) return;
+    anaSig = sig;
+
+    $("anaEmpty").textContent = "Analyysi näkyy, kun pelissä on siirtoja. Voit myös tuoda valmiin pelin kohdasta \"Tuo tai vie peli\".";
+    $("anaEmpty").hidden = n > 0;
+    $("anaBody").hidden = n === 0;
+    if (!n) return;
+
+    const target = Math.min(BG_DEPTH, state.depth);
+    const done = evs.filter((e) => e && e.depth >= target).length;
+    const prog = $("anaProgress");
+    // rivi pysyy paikallaan myös valmiina, ettei sen alla oleva sisältö hyppää
+    prog.hidden = false;
+    $("anaBar").style.width = (100 * done / pos.length).toFixed(1) + "%";
+    $("anaText").textContent = done >= pos.length
+      ? "Analyysi valmis · syvyys " + target
+      : "Analysoidaan: " + done + "/" + pos.length + " asemaa";
+
+    const results = [];
+    for (let i = 0; i < n; i++) results.push(classify(i, pos));
+
+    renderGameInfo();
+    renderGraph(pos, evs, results, onMain);
+    renderPlayerCards(pos, results, done >= pos.length);
+    renderTurns(pos, results, done >= pos.length);
+  }
+
+  function renderGameInfo() {
+    const box = $("gameInfo"), h = game.header();
+    if (!h.White && !h.Black) { box.hidden = true; return; }
+    box.replaceChildren();
+    const row = el("div", "players");
+    row.appendChild(el("span", "lbl", "Pelasin:"));
+    ["w", "b"].forEach((c) => {
+      const b = el("button", "pbtn");
+      b.type = "button";
+      b.setAttribute("aria-pressed", String(state.myColor === c));
+      const elo = c === "w" ? h.WhiteElo : h.BlackElo;
+      b.append(el("span", "pdot " + c), el("span", null, playerName(c)));
+      if (elo && elo !== "?") b.appendChild(el("small", null, elo));
+      b.addEventListener("click", () => {
+        state.myColor = c; state.flipped = c === "b";
+        syncSettingsUI(); save(); renderAll();
+      });
+      row.appendChild(b);
+    });
+    box.appendChild(row);
+    const meta = [h.Result && h.Result !== "*" ? h.Result : null, h.Date && !/\?/.test(h.Date) ? h.Date : null, h.Event && h.Event !== "?" ? h.Event : null]
+      .filter(Boolean).join(" · ");
+    if (meta) box.appendChild(el("div", "meta", meta));
+    box.hidden = false;
+  }
+
+  let graphGeom = null; // hiiren ja kosketuksen kohdistusta varten
+  function renderGraph(pos, evs, results, onMain) {
+    const svg = $("graph"), wrap = $("graphWrap");
+    const n = pos.length - 1;
+    const W = Math.max(200, wrap.clientWidth || 300), H = wrap.clientHeight || 120, P = 6;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    const x = (i) => P + i * (W - 2 * P) / n;
+    const y = (s) => H / 2 - winChance(s) * (H / 2 - P);
+    let last = 0;
+    const ys = evs.map((e) => { if (e) last = e.score; return y(last); });
+    graphGeom = { W, P, n, pos, evs, results };
+
+    svg.replaceChildren();
+    svg.appendChild(svgEl("rect", { x: 0, y: 0, width: W, height: H, style: "fill: var(--bar-black)" }));
+    let d = "M0 " + H + " L0 " + ys[0].toFixed(1);
+    ys.forEach((yy, i) => { d += " L" + x(i).toFixed(1) + " " + yy.toFixed(1); });
+    d += " L" + W + " " + ys[n].toFixed(1) + " L" + W + " " + H + " Z";
+    svg.appendChild(svgEl("path", { d, style: "fill: var(--bar-white)" }));
+    svg.appendChild(svgEl("line", { x1: 0, x2: W, y1: H / 2, y2: H / 2, "stroke-dasharray": "3 4", style: "stroke: var(--muted); stroke-width: 1; opacity: .7" }));
+    if (onMain) {
+      const cx = x(curPly()).toFixed(1);
+      svg.appendChild(svgEl("line", { x1: cx, x2: cx, y1: 0, y2: H, style: "stroke: var(--accent); stroke-width: 2" }));
+    }
+    results.forEach((r, i) => {
+      if (!r || !BAD.includes(r.kind)) return;
+      svg.appendChild(svgEl("circle", {
+        cx: x(i + 1).toFixed(1), cy: ys[i + 1].toFixed(1), r: r.kind === "inacc" ? 3.5 : 5,
+        style: "fill: var(--q-" + (r.kind === "inacc" ? "inacc" : r.kind) + "); stroke: var(--surface); stroke-width: 2"
+      }));
+    });
+  }
+
+  function graphPly(e) {
+    const g = graphGeom;
+    if (!g || !g.n) return null;
+    const rect = $("graph").getBoundingClientRect();
+    const px = (e.clientX - rect.left) * (g.W / rect.width);
+    return { ply: Math.max(0, Math.min(g.n, Math.round((px - g.P) / ((g.W - 2 * g.P) / g.n)))), rect };
+  }
+  $("graphWrap").addEventListener("pointermove", (e) => {
+    if (e.pointerType === "touch") return;
+    const hit = graphPly(e);
+    if (!hit) return;
+    const g = graphGeom, i = hit.ply;
+    const left = g.P + i * (g.W - 2 * g.P) / g.n;
+    const pxLeft = left * (hit.rect.width / g.W);
+    const cross = $("gcross"), tip = $("gtip");
+    cross.style.left = pxLeft + "px";
+    cross.hidden = false;
+    let text = "Alkuasema";
+    if (i > 0) {
+      const r = g.results[i - 1];
+      text = moveLabel(g.pos, i - 1) + (r && QUALITY[r.kind].mark ? QUALITY[r.kind].mark : "");
+    }
+    if (g.evs[i]) text += " · " + evalText(g.evs[i]);
+    tip.textContent = text;
+    tip.hidden = false;
+    const tw = tip.offsetWidth;
+    tip.style.left = Math.max(4, Math.min(hit.rect.width - tw - 4, pxLeft + 8)) + "px";
+  });
+  $("graphWrap").addEventListener("pointerleave", () => { $("gcross").hidden = true; $("gtip").hidden = true; });
+  $("graphWrap").addEventListener("click", (e) => {
+    const hit = graphPly(e);
+    if (hit) goToMain(hit.ply);
+  });
+  if (window.ResizeObserver) new ResizeObserver(() => { anaSig = ""; renderAnalysis(); }).observe($("graphWrap"));
+
+  // Pelaajien vertailu taulukkona: tarkkuus ja virheiden määrät rinnakkain
+  function renderPlayerCards(pos, results, complete) {
+    const table = $("pcards");
+    table.replaceChildren();
+    const head = el("tr");
+    const th = (content, title) => { const c = el("th"); c.append(content); if (title) c.title = title; return c; };
+    head.append(th(""), th("Tarkkuus"),
+      th(el("span", "q blunder", "??"), "Mokat"), th(el("span", "q mistake", "?"), "Virheet"), th(el("span", "q inacc", "?!"), "Epätarkkuudet"));
+    const thead = el("thead"); thead.appendChild(head);
+    const tbody = el("tbody");
+    ["w", "b"].forEach((color) => {
+      const tr = el("tr");
+      const who = el("div", "who");
+      who.append(el("span", "pdot " + color), el("span", null, playerName(color)));
+      if (color === state.myColor) who.appendChild(el("small", null, "sinä"));
+      const c0 = el("td"); c0.appendChild(who);
+      // tarkkuus vasta kun koko peli on analysoitu, ettei osittainen luku johda harhaan
+      const acc = complete ? accuracyOf(pos, color) : null;
+      const c1 = el("td", "acc" + (acc == null ? " zero" : ""), acc == null ? (complete ? "–" : "…") : Math.round(acc) + " %");
+      if (!complete) c1.title = "Lasketaan, kun analyysi on valmis";
+      const cnt = { blunder: 0, mistake: 0, inacc: 0 };
+      results.forEach((r, i) => { if (r && r.kind in cnt && pos[i + 1].move.color === color) cnt[r.kind]++; });
+      tr.append(c0, c1, ...["blunder", "mistake", "inacc"].map((k) => el("td", cnt[k] ? null : "zero", String(cnt[k]))));
+      tbody.appendChild(tr);
+    });
+    table.append(thead, tbody);
+  }
+
+  // Käännekohdat: suurimmat virheet ja mokat aikajärjestyksessä
+  function renderTurns(pos, results, complete) {
+    const box = $("turns");
+    box.replaceChildren();
+    const items = [];
+    results.forEach((r, i) => { if (r && (r.kind === "blunder" || r.kind === "mistake")) items.push({ i, r }); });
+    items.sort((a, b) => b.r.loss - a.r.loss);
+    const top = items.slice(0, 5).sort((a, b) => a.i - b.i);
+    if (!top.length) {
+      box.appendChild(el("p", "none", complete
+        ? "Pelissä ei ollut yhtään virhettä tai mokaa."
+        : "Käännekohdat ilmestyvät tähän analyysin edetessä."));
+      return;
+    }
+    top.forEach(({ i, r }) => {
+      const b = el("button", "turn");
+      b.type = "button";
+      b.title = QUALITY[r.kind].label;
+      b.append(
+        el("span", "q " + r.kind, QUALITY[r.kind].mark),
+        el("span", "rv-move", moveLabel(pos, i)),
+        el("span", "tev", evalText(r.before) + " → " + evalText(r.after)),
+        el("small", null, r.move.color === state.myColor ? "sinun siirtosi" : "vastustaja")
+      );
+      b.addEventListener("click", () => goToMain(i + 1));
+      box.appendChild(b);
+    });
+  }
+
+  // ---------- PGN-tuonti ja -vienti ----------
+  const PGN_OPTS = { sloppy: true, newline_char: "\r?\n" };
+  function pgnMsg(text, err) { const m = $("pgnMsg"); m.textContent = text; m.className = "msg" + (err ? " err" : ""); }
+
+  function parsePgn(text) {
+    text = String(text || "").replace(/^﻿/, "").trim();
+    if (!text) return { error: "Liitä ensin peli tekstikenttään tai valitse tiedosto." };
+    const first = text.split(/\r?\n\s*\r?\n(?=\s*\[Event )/)[0]; // vain ensimmäinen peli
+    const c = new Chess();
+    if (!c.load_pgn(first, PGN_OPTS)) {
+      return { error: "Peliä ei voitu lukea. Tarkista, että teksti on PGN-muodossa englanninkielisin merkinnöin (esim. 1. e4 e5 2. Nf3 Nc6)." };
+    }
+    if (!c.history().length) return { error: "Pelissä ei ole siirtoja." };
+    return { pgn: first, plies: c.history().length, multiple: first.length < text.length };
+  }
+
+  let importArmed = null;
+  function doImport(text) {
+    const res = parsePgn(text);
+    if (res.error) { pgnMsg(res.error, true); return; }
+    const btn = $("importPgn");
+    if (!importArmed && game.history().length) {
+      btn.textContent = "Vahvista: korvaa nykyinen peli";
+      btn.classList.add("warn");
+      importArmed = { text, timer: setTimeout(resetImportBtn, 4000) };
+      pgnMsg("Tuonti korvaa nykyisen pelin. Paina painiketta uudelleen vahvistaaksesi.");
+      return;
+    }
+    resetImportBtn();
+    applyImport(res.pgn);
+    $("pgnInput").value = "";
+    pgnMsg("Tuotu " + Math.ceil(res.plies / 2) + " siirron peli" + (res.multiple ? " (tiedoston ensimmäinen peli)" : "") + ". Analyysi käynnistyi.");
+  }
+
+  // Ottaa pelin käyttöön; jos oma käyttäjänimi on tiedossa, laudan suunta ja oma väri asetetaan sen mukaan
+  function applyImport(pgn, me) {
+    stopPlayMode();
+    game.load_pgn(pgn, PGN_OPTS);
+    variation = null; viewPly = null; selected = null; legalFromSel = [];
+    anaSig = "";
+    if (me) {
+      const h = game.header(), lc = (x) => String(x || "").toLowerCase();
+      const color = lc(h.White) === lc(me) ? "w" : lc(h.Black) === lc(me) ? "b" : null;
+      if (color) { state.myColor = color; state.flipped = color === "b"; syncSettingsUI(); }
+    }
+    save(); rebuildView(); renderAll(); analyze();
+    setTab("ana");
+  }
+  function resetImportBtn() {
+    if (importArmed) clearTimeout(importArmed.timer);
+    importArmed = null;
+    const btn = $("importPgn");
+    btn.textContent = "Tuo peli"; btn.classList.remove("warn");
+  }
+  $("importPgn").addEventListener("click", () => doImport(importArmed ? importArmed.text : $("pgnInput").value));
+  $("pgnInput").addEventListener("input", resetImportBtn);
+  $("pgnFile").addEventListener("change", (e) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => { $("pgnInput").value = String(r.result); resetImportBtn(); doImport(String(r.result)); };
+    r.onerror = () => pgnMsg("Tiedostoa ei voitu lukea.", true);
+    r.readAsText(f);
+    e.target.value = "";
+  });
+  $("copyPgn").addEventListener("click", () => {
+    const text = game.pgn();
+    if (!text) { pgnMsg("Pelissä ei ole vielä siirtoja.", true); return; }
+    const fallback = () => { const t = $("pgnInput"); t.value = text; t.select(); pgnMsg("PGN on tekstikentässä valittuna – kopioi pikanäppäimellä."); };
+    try { navigator.clipboard.writeText(text).then(() => pgnMsg("PGN kopioitu."), fallback); } catch (err) { fallback(); }
+  });
+
+  function renderAll() {
+    renderBoard();
+    renderMoves();
+    renderNav();
+    $("fenInput").value = view.fen();
+    $("undoBtn").disabled = activeMoves().length === 0;
+    renderLines();
+    renderReview();
+    drawArrows();
+    renderPlay();
+  }
+
+  // ---------- Siirtojen syöttö ----------
+  boardEl.addEventListener("click", (e) => {
+    const el = e.target.closest(".sq");
+    if (!el || pendingPromo) return;
+    onSquare(el.dataset.sq);
+  });
+
+  function onSquare(sq) {
+    if (view.game_over()) return;
+    // Pelissä konetta vastaan siirron voi tehdä vain omalla vuorolla viimeisimmässä asemassa
+    if (assistOff()) {
+      if (viewPly !== null || variation) { playMsg("Palaa viimeisimpään siirtoon jatkaaksesi peliä."); return; }
+      if (play.thinking || view.turn() !== play.human) { playMsg("Odota, kone miettii siirtoaan."); return; }
+    }
+    if (selected) {
+      const cand = legalFromSel.filter((m) => m.to === sq);
+      if (cand.length) {
+        if (cand.some((m) => m.promotion)) return askPromotion(selected, sq);
+        return playMove({ from: selected, to: sq });
+      }
+      if (sq === selected) return clearSel();
+    }
+    const p = view.get(sq);
+    if (p && p.color === view.turn()) {
+      selected = sq;
+      legalFromSel = view.moves({ square: sq, verbose: true });
+    } else {
+      selected = null; legalFromSel = [];
+    }
+    renderBoard();
+  }
+  function clearSel() { selected = null; legalFromSel = []; renderBoard(); }
+
+  function askPromotion(from, to) {
+    pendingPromo = { from, to };
+    const color = view.turn();
+    const box = $("promoBox");
+    box.replaceChildren();
+    [["q", "Daami"], ["r", "Torni"], ["b", "Lähetti"], ["n", "Ratsu"]].forEach(([t, name]) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.setAttribute("aria-label", name);
+      const s = document.createElement("span"); s.className = "piece " + color; s.textContent = GLYPH[t] + "︎";
+      b.appendChild(s);
+      b.addEventListener("click", () => { const m = pendingPromo; pendingPromo = null; $("promo").hidden = true; playMove({ ...m, promotion: t }); });
+      box.appendChild(b);
+    });
+    $("promo").hidden = false;
+  }
+  $("promo").addEventListener("click", (e) => {
+    if (e.target.id === "promo") { pendingPromo = null; $("promo").hidden = true; clearSel(); }
+  });
+
+  // Siirto laudalla näkyvästä asemasta. Lopussa siirto jatkaa linjaa. Aiemmassa asemassa sama siirto
+  // kuin pelissä vain etenee, ja eri siirto aloittaa sivuvariantin, joten pelin loppuosa säilyy.
+  function playMove(m) {
+    selected = null; legalFromSel = [];
+    const res = new Chess(view.fen()).move(m);
+    if (!res) { renderBoard(); return; }
+    const ms = activeMoves(), ply = curPly();
+    const next = ms[ply];
+    if (next && next.from === res.from && next.to === res.to && (next.promotion || "") === (res.promotion || "")) {
+      viewPly = ply + 1;
+    } else if (!variation && ply === ms.length) {
+      game.move(m); viewPly = null; playMsg("");
+      afterMainMove();
+      return;
+    } else if (variation && ply >= variation.base) {
+      variation.moves = variation.moves.slice(0, ply - variation.base).concat([res]); viewPly = null;
+    } else {
+      variation = { base: ply, moves: [res] }; viewPly = null;
+    }
+    rebuildView(); renderAll(); analyze();
+  }
+
+  // Peruu aktiivisen linjan viimeisen siirron (sivuvariantissa variantin siirron)
+  $("undoBtn").addEventListener("click", () => {
+    if (play.active && !variation) { takeback(); return; }
+    if (variation) {
+      variation.moves.pop();
+      if (!variation.moves.length) { viewPly = variation.base; variation = null; } else viewPly = null;
+    } else {
+      game.undo(); viewPly = null; save();
+    }
+    selected = null; legalFromSel = [];
+    rebuildView(); renderAll(); analyze();
+  });
+  $("flipBtn").addEventListener("click", () => { state.flipped = !state.flipped; save(); renderBoard(); drawArrows(); });
+
+  let newArmed = null;
+  $("newBtn").addEventListener("click", () => {
+    const btn = $("newBtn");
+    if (!newArmed && game.history().length) {
+      btn.textContent = "Vahvista: tyhjennä peli";
+      btn.classList.add("warn");
+      newArmed = setTimeout(() => { newArmed = null; btn.textContent = "Uusi peli"; btn.classList.remove("warn"); }, 3000);
+      return;
+    }
+    clearTimeout(newArmed); newArmed = null;
+    btn.textContent = "Uusi peli"; btn.classList.remove("warn");
+    stopPlayMode();
+    game.reset(); variation = null; viewPly = null; selected = null; legalFromSel = [];
+    save(); rebuildView(); renderAll(); analyze();
+  });
+
+  // ---------- Asetukset ----------
+  function syncSettingsUI() {
+    $("beginnerToggle").checked = state.beginner;
+    document.body.classList.toggle("beginner", state.beginner);
+    for (const b of $("colorSeg").children) b.setAttribute("aria-pressed", b.dataset.v === state.myColor);
+    for (const b of $("pvSeg").children) b.setAttribute("aria-pressed", +b.dataset.v === state.multipv);
+    $("onlyMine").checked = state.onlyMine;
+    $("depth").value = state.depth; $("depthOut").textContent = state.depth;
+  }
+  $("beginnerToggle").addEventListener("change", (e) => {
+    state.beginner = e.target.checked;
+    syncSettingsUI(); save(); renderAll(); fitPanel();
+  });
+  $("colorSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    state.myColor = b.dataset.v; state.flipped = state.myColor === "b";
+    syncSettingsUI(); save(); renderAll();
+  });
+  $("pvSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    state.multipv = +b.dataset.v; syncSettingsUI(); save(); analyze(true);
+  });
+  // Moottori laskee aina (siirtojen arviointia varten); asetus vain piilottaa suositukset vastustajan vuorolla
+  $("onlyMine").addEventListener("change", (e) => { state.onlyMine = e.target.checked; save(); renderLines(); drawArrows(); });
+  const isBlocked = () => state.onlyMine && !view.game_over() && view.turn() !== state.myColor;
+  $("depth").addEventListener("input", (e) => { $("depthOut").textContent = e.target.value; });
+  $("depth").addEventListener("change", (e) => { state.depth = +e.target.value; save(); analyze(true); });
+
+  // ---------- FEN ----------
+  $("loadFen").addEventListener("click", () => {
+    const fen = $("fenInput").value.trim();
+    const v = game.validate_fen(fen);
+    const msg = $("fenMsg");
+    if (!v.valid) { msg.textContent = "FEN ei kelpaa: " + v.error; msg.className = "msg err"; return; }
+    stopPlayMode();
+    game.load(fen); variation = null; viewPly = null; selected = null; legalFromSel = [];
+    msg.textContent = "Asema ladattu."; msg.className = "msg";
+    save(); rebuildView(); renderAll(); analyze();
+  });
+  $("copyFen").addEventListener("click", () => {
+    const input = $("fenInput"), msg = $("fenMsg");
+    const fallback = () => { input.select(); msg.textContent = "Valittu – kopioi pikanäppäimellä."; msg.className = "msg"; };
+    try {
+      navigator.clipboard.writeText(view.fen()).then(() => { msg.textContent = "FEN kopioitu."; msg.className = "msg"; }, fallback);
+    } catch (e) { fallback(); }
+  });
+
+  // ---------- Omien pelien haku (vain sovellusversiossa; artifactin suojaukset estävät ulkoiset haut) ----------
+  const HOSTED = !!window.APP_HOSTED;
+  const FETCH_KEY = "shakkivalmentaja.fetch";
+  const SPEED_FI = { ultraBullet: "ultrabullet", bullet: "bullet", blitz: "blitz", rapid: "pikapeli", classical: "pitkä peli", correspondence: "kirjeshakki", daily: "kirjeshakki" };
+  const DRAWS_CC = ["agreed", "repetition", "stalemate", "insufficient", "50move", "timevsinsufficient"];
+  const fetchPrefs = { src: "lichess", user: "" };
+  let fetchedGames = [];
+  try { Object.assign(fetchPrefs, JSON.parse(localStorage.getItem(FETCH_KEY) || "{}")); } catch (e) { /* ignore */ }
+  const saveFetchPrefs = () => { try { localStorage.setItem(FETCH_KEY, JSON.stringify(fetchPrefs)); } catch (e) { /* ignore */ } };
+  function fetchMsg(text, err) { const m = $("fetchMsg"); m.textContent = text || ""; m.className = "msg" + (err ? " err" : ""); }
+
+  class FetchError extends Error { constructor(kind) { super(kind); this.kind = kind; } }
+  async function getJson(url, accept) {
+    let r;
+    try { r = await fetch(url, { headers: accept ? { Accept: accept } : {} }); }
+    catch (e) { throw new FetchError("network"); }
+    if (r.status === 404) throw new FetchError("notfound");
+    if (r.status === 429) throw new FetchError("ratelimit");
+    if (!r.ok) throw new FetchError("http");
+    return accept === "application/x-ndjson" ? r.text() : r.json();
+  }
+
+  async function fetchLichess(user) {
+    const text = await getJson("https://lichess.org/api/games/user/" + encodeURIComponent(user) +
+      "?max=20&pgnInJson=true&opening=true&clocks=false&evals=false&moves=true", "application/x-ndjson");
+    return text.split("\n").filter(Boolean).map((l) => JSON.parse(l))
+      .filter((g) => (g.variant === "standard" || g.variant === "fromPosition") && g.pgn)
+      .map((g) => ({
+        pgn: g.pgn,
+        white: (g.players.white.user && g.players.white.user.name) || (g.players.white.aiLevel ? "Lichess AI " + g.players.white.aiLevel : "?"),
+        black: (g.players.black.user && g.players.black.user.name) || (g.players.black.aiLevel ? "Lichess AI " + g.players.black.aiLevel : "?"),
+        wElo: g.players.white.rating, bElo: g.players.black.rating,
+        result: g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : ["draw", "stalemate"].includes(g.status) ? "1/2-1/2" : "*",
+        date: new Date(g.createdAt), speed: SPEED_FI[g.speed] || g.speed || "",
+        opening: g.opening && g.opening.name ? g.opening.name : ""
+      }));
+  }
+
+  async function fetchChessCom(user) {
+    const base = "https://api.chess.com/pub/player/" + encodeURIComponent(user.toLowerCase()) + "/games/archives";
+    const archives = (await getJson(base)).archives || [];
+    const out = [];
+    for (let i = archives.length - 1; i >= 0 && out.length < 20 && i >= archives.length - 3; i--) {
+      const month = (await getJson(archives[i])).games || [];
+      month.filter((g) => g.rules === "chess" && g.pgn).reverse().forEach((g) => {
+        if (out.length >= 20) return;
+        const eco = (g.pgn.match(/\[ECOUrl "[^"]*\/openings\/([^"]+)"\]/) || [])[1];
+        out.push({
+          pgn: g.pgn, white: g.white.username, black: g.black.username, wElo: g.white.rating, bElo: g.black.rating,
+          result: g.white.result === "win" ? "1-0" : g.black.result === "win" ? "0-1" : DRAWS_CC.includes(g.white.result) ? "1/2-1/2" : "*",
+          date: new Date(g.end_time * 1000), speed: SPEED_FI[g.time_class] || g.time_class || "",
+          opening: eco ? decodeURIComponent(eco).replace(/-/g, " ").replace(/\s+\d.*$/, "") : ""
+        });
+      });
+    }
+    return out;
+  }
+
+  function renderGameList(user) {
+    const list = $("gameList");
+    list.replaceChildren();
+    list.hidden = !fetchedGames.length;
+    const lc = user.toLowerCase();
+    fetchedGames.forEach((g, idx) => {
+      const meWhite = g.white.toLowerCase() === lc;
+      const meBlack = g.black.toLowerCase() === lc;
+      const mine = meWhite ? "1-0" : meBlack ? "0-1" : null;
+      let res = "–", cls = "";
+      if (g.result === "1/2-1/2") res = "Tasan";
+      else if (mine && g.result === mine) { res = "Voitto"; cls = "win"; }
+      else if (mine && g.result !== "*") { res = "Tappio"; cls = "loss"; }
+      const opp = meBlack ? { name: g.white, elo: g.wElo } : { name: g.black, elo: g.bElo };
+      const b = el("button", "grow");
+      b.type = "button";
+      const r = el("span", "res " + cls, res);
+      const o = el("span", "opp");
+      o.append((meWhite ? "Valkeilla" : meBlack ? "Mustilla" : g.white) + " vs " + opp.name + " ");
+      if (opp.elo) o.appendChild(el("small", null, String(opp.elo)));
+      const meta = el("span", "meta", [g.date.toLocaleDateString("fi-FI"), g.speed, g.opening].filter(Boolean).join(" · "));
+      b.append(r, o, meta);
+      b.addEventListener("click", () => {
+        if (assistOff()) { fetchMsg("Peli konetta vastaan on kesken. Lopeta tai luovuta se ensin.", true); return; }
+        applyImport(g.pgn, user);
+        fetchMsg("Peli avattu. Analyysi käynnistyi.");
+        $("boardWrap").scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      });
+      list.appendChild(b);
+    });
+  }
+
+  async function doFetch(e) {
+    if (e) e.preventDefault();
+    const user = $("userInput").value.trim();
+    if (!/^[A-Za-z0-9_-]{2,30}$/.test(user)) { fetchMsg("Kirjoita käyttäjänimi (2–30 merkkiä: kirjaimia, numeroita, _ tai -).", true); return; }
+    fetchPrefs.user = user; saveFetchPrefs();
+    const svc = fetchPrefs.src === "chesscom" ? "Chess.com" : "Lichess";
+    $("fetchBtn").disabled = true;
+    fetchMsg("Haetaan pelejä palvelusta " + svc + "…");
+    try {
+      fetchedGames = fetchPrefs.src === "chesscom" ? await fetchChessCom(user) : await fetchLichess(user);
+      renderGameList(user);
+      fetchMsg(fetchedGames.length ? "Löytyi " + fetchedGames.length + " peliä. Napauta peliä analysoidaksesi sen." : "Käyttäjällä ei ole tavallisen shakin pelejä palvelussa " + svc + ".");
+    } catch (err) {
+      fetchedGames = []; renderGameList(user);
+      const kind = err && err.kind;
+      fetchMsg(kind === "notfound" ? "Käyttäjää " + user + " ei löytynyt palvelusta " + svc + ". Tarkista kirjoitusasu."
+        : kind === "ratelimit" ? svc + " rajoittaa hakuja hetken. Yritä uudelleen minuutin päästä."
+        : kind === "network" ? "Hakua ei voitu tehdä. Tarkista verkkoyhteys ja yritä uudelleen."
+        : "Haku epäonnistui. Yritä hetken päästä uudelleen.", true);
+    } finally {
+      $("fetchBtn").disabled = false;
+    }
+  }
+
+  function syncFetchUI() {
+    $("fetchBox").hidden = !HOSTED;
+    $("fetchOff").hidden = HOSTED;
+    for (const b of $("srcSeg").children) b.setAttribute("aria-pressed", String(b.dataset.v === fetchPrefs.src));
+    if (!$("userInput").value) $("userInput").value = fetchPrefs.user || "";
+  }
+  $("srcSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    fetchPrefs.src = b.dataset.v; saveFetchPrefs(); syncFetchUI();
+    fetchedGames = []; renderGameList(""); fetchMsg("");
+  });
+  $("fetchForm").addEventListener("submit", doFetch);
+
+  // Moottorin nimi ja virherajat ohjeeseen käytössä olevan moottorin mukaan
+  function syncEngineTexts() {
+    document.querySelectorAll(".engine-name").forEach((e) => { e.textContent = ENGINE.name; });
+    document.querySelectorAll(".old-engine").forEach((e) => { e.hidden = ENGINE.cpScale === 1; });
+    document.querySelectorAll(".thr").forEach((e) => {
+      const w = +e.dataset.w;
+      const pawns = Math.log((1 + w) / (1 - w)) / (0.00368208 * ENGINE.cpScale) / 100;
+      e.textContent = pawns.toFixed(1).replace(".", ",");
+    });
+  }
+
+  // ---------- Peli konetta vastaan ----------
+  // Vastustaja on oma Stockfish-instanssinsa, jonka vahvuutta rajoitetaan Skill Level -asetuksella ja syvyydellä.
+  // Analyysimoottori laskee pelin aikana taustalla, mutta sen tulokset näytetään vasta pelin päätyttyä.
+  const LEVELS = [
+    { name: "Aloittelija", skill: 0, depth: 1 },
+    { name: "Vasta-alkaja", skill: 3, depth: 2 },
+    { name: "Satunnainen pelaaja", skill: 6, depth: 4 },
+    { name: "Harrastaja", skill: 9, depth: 6 },
+    { name: "Kerhopelaaja", skill: 12, depth: 8 },
+    { name: "Vahva kerhopelaaja", skill: 15, depth: 10 },
+    { name: "Mestaritaso", skill: 18, depth: 13 },
+    { name: "Täysi voima", skill: 20, depth: 16 }
+  ];
+  const RESULTS = ["1-0", "0-1", "1/2-1/2"];
+  const play = { active: false, level: 3, human: "w", pick: "w", hints: 0, thinking: false, token: 0, hintFen: null };
+  const playOver = () => game.game_over() || RESULTS.includes(game.header().Result);
+  const assistOff = () => play.active && !playOver();
+  const levelLabel = (lv) => "Stockfish taso " + lv + " (" + LEVELS[lv - 1].name + ")";
+  let opp = null, oppJob = null, oppIgnore = 0;
+
+  function makeWorker() {
+    if (window.STOCKFISH_LOCAL) return new Worker(window.STOCKFISH_LOCAL);
+    const blob = new Blob(['importScripts("' + STOCKFISH_URL + '");'], { type: "application/javascript" });
+    return new Worker(URL.createObjectURL(blob));
+  }
+
+  function playMsg(text, err) { const m = $("playMsg"); m.textContent = text || ""; m.className = "msg" + (err ? " err" : ""); }
+
+  function oppEngine() {
+    if (opp) return opp;
+    try { opp = makeWorker(); } catch (e) { playMsg("Vastustajan moottoria ei voitu käynnistää.", true); return null; }
+    opp.onmessage = (e) => onOppLine(String(e.data));
+    opp.onerror = () => playMsg("Vastustajan moottorin lataus epäonnistui – tarkista verkkoyhteys.", true);
+    opp.postMessage("uci");
+    return opp;
+  }
+
+  function maybeEngineMove() {
+    if (!play.active || playOver() || game.turn() === play.human || play.thinking) return;
+    const w = oppEngine();
+    if (!w) return;
+    const L = LEVELS[play.level - 1];
+    play.thinking = true;
+    oppJob = { token: ++play.token, fen: game.fen(), start: Date.now() };
+    w.postMessage("setoption name Skill Level value " + L.skill);
+    w.postMessage("position fen " + oppJob.fen);
+    w.postMessage("go depth " + L.depth);
+    renderPlay();
+  }
+
+  function onOppLine(line) {
+    if (!line.startsWith("bestmove")) return;
+    if (oppIgnore > 0) { oppIgnore--; return; } // peruttu haku
+    const job = oppJob;
+    oppJob = null;
+    if (!job) return;
+    const uci = line.split(/\s+/)[1];
+    const wait = Math.max(0, 600 - (Date.now() - job.start)); // pieni tauko, ettei vastaus tule välittömästi
+    setTimeout(() => {
+      if (job.token !== play.token) return;
+      play.thinking = false;
+      if (!play.active || game.fen() !== job.fen || !uci || uci === "(none)") { renderPlay(); return; }
+      game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] });
+      afterMainMove();
+    }, wait);
+  }
+
+  function cancelOppMove() {
+    if (oppJob && opp) { oppIgnore++; opp.postMessage("stop"); }
+    oppJob = null;
+    play.token++;
+    play.thinking = false;
+  }
+
+  // Pelin siirron jälkeen: tulos talteen, näkymä päivitykseen ja tarvittaessa koneen vuoro
+  function afterMainMove() {
+    if (play.active && game.game_over() && !RESULTS.includes(game.header().Result)) {
+      game.header("Result", game.in_checkmate() ? (game.turn() === "w" ? "0-1" : "1-0") : "1/2-1/2");
+    }
+    play.hintFen = null;
+    save(); rebuildView(); renderAll(); analyze();
+    maybeEngineMove();
+  }
+
+  function today() {
+    const d = new Date();
+    return d.getFullYear() + "." + String(d.getMonth() + 1).padStart(2, "0") + "." + String(d.getDate()).padStart(2, "0");
+  }
+
+  function startPlay() {
+    cancelOppMove();
+    const human = play.pick === "r" ? (Math.random() < 0.5 ? "w" : "b") : play.pick;
+    Object.assign(play, { active: true, human, hints: 0, hintFen: null });
+    game.reset();
+    const bot = levelLabel(play.level);
+    game.header("Event", "Harjoituspeli", "Date", today(),
+      "White", human === "w" ? "Sinä" : bot, "Black", human === "b" ? "Sinä" : bot, "Result", "*");
+    variation = null; viewPly = null; selected = null; legalFromSel = [];
+    state.myColor = human; state.flipped = human === "b";
+    syncSettingsUI();
+    if (oppEngine()) opp.postMessage("ucinewgame");
+    playMsg("");
+    save(); rebuildView(); renderAll(); analyze();
+    setTab("now");
+    maybeEngineMove();
+  }
+
+  function stopPlayMode() {
+    cancelOppMove();
+    play.active = false; play.hintFen = null;
+  }
+
+  // Peru oma siirto ja koneen vastaus
+  function takeback() {
+    cancelOppMove();
+    if (RESULTS.includes(game.header().Result)) game.header("Result", "*");
+    game.undo();
+    while (game.history().length && game.turn() !== play.human) game.undo();
+    viewPly = null; selected = null; legalFromSel = []; play.hintFen = null;
+    save(); rebuildView(); renderAll(); analyze();
+    maybeEngineMove();
+  }
+
+  function resultInfo() {
+    const r = game.header().Result;
+    if (!RESULTS.includes(r)) return null;
+    let how = "luovutukseen";
+    if (game.in_checkmate()) how = "mattiin";
+    else if (game.in_stalemate()) how = "pattiin";
+    else if (game.in_threefold_repetition()) how = "kolmesti toistuneeseen asemaan";
+    else if (game.insufficient_material()) how = "riittämättömään materiaaliin";
+    else if (game.in_draw()) how = "50 siirron sääntöön";
+    if (r === "1/2-1/2") return { cls: "draw", text: "Tasapeli – peli päättyi " + how + "." };
+    const won = (r === "1-0") === (play.human === "w");
+    return { cls: won ? "win" : "lose", text: (won ? "Voitit! " : "Hävisit. ") + "Peli päättyi " + how + "." };
+  }
+
+  let resignArmed = null;
+  function renderPlay() {
+    // käynnissä oleva peli paneelin ylimpänä, aloitusasetukset työkaluissa
+    $("playSec").hidden = !play.active;
+    $("foldPlay").hidden = play.active;
+    for (const b of $("playColor").children) b.setAttribute("aria-pressed", String(b.dataset.v === play.pick));
+    $("playLevel").value = play.level;
+    $("playLevelOut").textContent = play.level;
+    $("playLevelName").textContent = LEVELS[play.level - 1].name;
+    if (!play.active) return;
+
+    const vs = $("playVs");
+    vs.replaceChildren(
+      el("span", "pdot " + play.human), el("span", null, "Sinä"), el("span", "sep", "vs"),
+      el("span", "pdot " + (play.human === "w" ? "b" : "w")), el("span", null, levelLabel(play.level))
+    );
+    const st = $("playState");
+    st.className = "pstate";
+    st.replaceChildren();
+    const actions = $("playActions");
+    actions.replaceChildren();
+    const btn = (text, cls, fn) => { const b = el("button", "btn" + (cls ? " " + cls : ""), text); b.type = "button"; b.addEventListener("click", fn); actions.appendChild(b); return b; };
+
+    const note = $("playNote");
+    const info = resultInfo();
+    if (info) {
+      st.classList.add(info.cls);
+      st.textContent = info.text;
+      note.textContent = "Analyysi ja siirtojen arviot ovat nyt näkyvissä." + (play.hints ? " Vihjeitä käytit " + play.hints + "." : "");
+      note.hidden = false;
+      btn("Uusi peli", "primary", startPlay);
+      btn("Lopeta pelitila", "", () => { stopPlayMode(); save(); renderAll(); analyze(true); });
+      return;
+    }
+    note.hidden = true;
+
+    if (viewPly !== null || variation) st.textContent = "Katselet aiempaa asemaa. Palaa viimeisimpään siirtoon jatkaaksesi.";
+    else if (play.thinking) { st.append(el("span", "spin"), "Kone miettii…"); }
+    else st.textContent = "Sinun vuorosi.";
+
+    btn("Vihje", "", () => {
+      if (play.thinking || view.turn() !== play.human || viewPly !== null) { playMsg("Vihjeen saa omalla vuorollasi viimeisimmässä asemassa."); return; }
+      play.hintFen = view.fen(); play.hints++;
+      save(); drawArrows(); renderPlay();
+      playMsg(curFen === view.fen() && lines[0] ? "Vihje näkyy laudalla nuolena." : "Vihje ilmestyy laudalle, kun moottori on laskenut hetken.");
+    });
+    const rb = btn(resignArmed ? "Vahvista luovutus" : "Luovuta", resignArmed ? "warn" : "", () => {
+      if (!resignArmed) {
+        resignArmed = setTimeout(() => { resignArmed = null; renderPlay(); }, 3000);
+        renderPlay();
+        return;
+      }
+      clearTimeout(resignArmed); resignArmed = null;
+      cancelOppMove();
+      game.header("Result", play.human === "w" ? "0-1" : "1-0");
+      save(); renderAll(); analyze(true);
+    });
+    rb.title = "Luovuta peli";
+    btn("Lopeta pelitila", "", () => { stopPlayMode(); save(); renderAll(); analyze(true); });
+  }
+
+  $("playColor").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    play.pick = b.dataset.v; save(); renderPlay();
+  });
+  $("playLevel").addEventListener("input", (e) => { play.level = +e.target.value; renderPlay(); });
+  $("playLevel").addEventListener("change", () => save());
+  let playArmed = null;
+  $("playStart").addEventListener("click", () => {
+    const btn = $("playStart");
+    if (!playArmed && game.history().length) {
+      btn.textContent = "Vahvista: nykyinen peli korvataan";
+      btn.classList.add("warn");
+      playArmed = setTimeout(() => { playArmed = null; btn.textContent = "Aloita peli"; btn.classList.remove("warn"); }, 3000);
+      return;
+    }
+    clearTimeout(playArmed); playArmed = null;
+    btn.textContent = "Aloita peli"; btn.classList.remove("warn");
+    startPlay();
+  });
+
+  // ---------- Moottori ----------
+  let engine = null, engineReady = false, searching = false, needRestart = false;
+  let wantFen = null, curFen = null;
+  let mode = null, searchFen = null, mainDone = false; // mode: "main" = nykyinen asema, "bg" = aiempien siirtojen arviointi
+  let lines = [], lastDepth = 0, rafPending = false;
+
+  function setStatus(text, st) {
+    if (state.beginner && st === "run") text = "Moottori miettii…";
+    else if (state.beginner && st === "done") text = "Valmis";
+    $("statusText").textContent = text;
+    $("status").title = text; // koko teksti näkyy, vaikka kiinteän levyinen rivi lyhentäisi sen
+    $("status").dataset.state = st;
+  }
+
+  function initEngine() {
+    try {
+      engine = makeWorker();
+    } catch (e) {
+      setStatus("Moottoria ei voitu käynnistää", "err");
+      return;
+    }
+    engine.onmessage = (e) => onEngineLine(typeof e.data === "string" ? e.data : String(e.data));
+    engine.onerror = () => setStatus("Moottorin lataus epäonnistui – tarkista verkkoyhteys", "err");
+    send("uci");
+    setTimeout(() => { if (!engineReady) setStatus("Moottori latautuu hitaasti…", "run"); }, 8000);
+  }
+  function send(cmd) { if (engine) engine.postMessage(cmd); }
+
+  function onEngineLine(line) {
+    if (line === "uciok") { send("isready"); return; }
+    if (line === "readyok") {
+      if (!engineReady) { engineReady = true; analyze(); }
+      return;
+    }
+    if (line.startsWith("bestmove")) {
+      searching = false;
+      const was = mode;
+      mode = null;
+      if (needRestart) { needRestart = false; startSearch(); return; }
+      if (was === "main") mainDone = true;
+      scheduleBg();
+      return;
+    }
+    if (needRestart || !line.startsWith("info") || line.indexOf(" pv ") < 0) return;
+    if (/ (lowerbound|upperbound)/.test(line)) return;
+    const depth = +(/ depth (\d+)/.exec(line) || [])[1];
+    const k = +((/ multipv (\d+)/.exec(line) || [, 1])[1]) - 1;
+    const sm = / score (cp|mate) (-?\d+)/.exec(line);
+    const pv = line.split(" pv ")[1].trim().split(/\s+/);
+    if (!sm || !depth) return;
+    let v = +sm[2];
+    if (searchFen.split(" ")[1] === "b") v = -v; // valkean näkökulmaan
+    const l = { depth, type: sm[1], v, pv };
+    if (k === 0) storeEval(searchFen, l);
+    if (mode === "main") {
+      lines[k] = l;
+      if (k === 0) lastDepth = depth;
+      setStatus("Laskee · syvyys " + lastDepth + "/" + state.depth, "run");
+    }
+    scheduleRender();
+  }
+
+  function scheduleRender() {
+    if (rafPending) return;
+    rafPending = true;
+    requestAnimationFrame(() => { rafPending = false; renderLines(); renderMovesIfChanged(); renderReview(); drawArrows(); });
+  }
+
+  function analyze(force) {
+    if (!engineReady) return;
+    wantFen = view.game_over() ? null : view.fen();
+    if (!force && wantFen && wantFen === curFen && (mode === "main" || mainDone)) return;
+    lines = [];
+    if (searching) { needRestart = true; send("stop"); renderLines(); drawArrows(); }
+    else startSearch();
+  }
+
+  function go(m, fen, multipv, depth) {
+    searching = true; mode = m; searchFen = fen;
+    send("setoption name MultiPV value " + multipv);
+    send("position fen " + fen);
+    send("go depth " + depth);
+  }
+
+  function startSearch() {
+    lines = []; lastDepth = 0; mainDone = false;
+    curFen = wantFen;
+    if (!curFen) { renderLines(); drawArrows(); scheduleBg(); return; }
+    go("main", curFen, assistOff() ? 1 : state.multipv, state.depth); // pelin aikana vain vihjettä varten
+    setStatus("Laskee…", "run");
+    renderLines(); drawArrows();
+  }
+
+  const bgTried = new Set();
+  // Kun nykyinen asema on laskettu, arvioidaan pelin aiemmat asemat siirtojen arviointia varten
+  function scheduleBg() {
+    const depth = Math.min(BG_DEPTH, state.depth);
+    const all = variation ? positions().concat(positionsOf(mainMoves())) : positions();
+    const todo = all.filter((p) => {
+      const e = evalOf(p.fen);
+      return (!e || e.depth < depth) && !bgTried.has(p.fen + "@" + depth);
+    });
+    if (todo.length) {
+      bgTried.add(todo[0].fen + "@" + depth);
+      go("bg", todo[0].fen, 1, depth);
+      setStatus("Arvioi siirtoja · " + todo.length + " jäljellä", "run");
+    } else {
+      setStatus(curFen ? "Valmis · syvyys " + lastDepth : "Peli päättyi", "done");
+    }
+    scheduleRender();
+  }
+
+  // ---------- Suositukset ----------
+  function evalText(l) {
+    if (l.type === "mate" && l.v === 0) return "matti";
+    if (l.type === "mate") return (l.v > 0 ? "#" : "#-") + Math.abs(l.v);
+    const s = l.v / 100;
+    return (s > 0 ? "+" : "") + s.toFixed(2);
+  }
+
+  function pvToSan(fen, pv, max) {
+    const c = new Chess(fen);
+    let no = +fen.split(" ")[5];
+    const out = [];
+    for (let i = 0; i < Math.min(pv.length, max); i++) {
+      const u = pv[i];
+      const white = c.turn() === "w";
+      const m = c.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] });
+      if (!m) break;
+      out.push({ prefix: white ? no + ". " : (i === 0 ? no + "… " : ""), san: fiSan(m.san) });
+      if (!white) no++;
+    }
+    return out;
+  }
+
+  function renderLines() {
+    linesEl.replaceChildren();
+    $("evalbar").classList.toggle("off", assistOff());
+    $("verdict").hidden = true;
+    const rows = shownLines();
+    linesEl.style.setProperty("--rows", rows);
+    // viesti täyttää koko varatun alueen, jotta korkeus ei muutu viestin ja rivien välillä
+    const msgRow = (text) => {
+      const d = document.createElement("div"); d.className = "line empty"; d.textContent = text;
+      d.style.gridRow = "span " + rows;
+      linesEl.appendChild(d);
+    };
+    if (assistOff()) {
+      msgRow("Peli konetta vastaan on käynnissä. Moottorin apu on piilossa, kunnes peli päättyy. Vihjeen saa pelipaneelista.");
+      setEvalBar(null);
+      return;
+    }
+    if (view.game_over()) {
+      let t = "Peli päättyi.";
+      if (view.in_checkmate()) t = "Matti! " + (view.turn() === "w" ? "Musta" : "Valkea") + " voitti.";
+      else if (view.in_stalemate()) t = "Patti – tasapeli.";
+      else if (view.in_threefold_repetition()) t = "Kolmesti toistunut asema – tasapeli.";
+      else if (view.insufficient_material()) t = "Riittämätön materiaali – tasapeli.";
+      else if (view.in_draw()) t = "Tasapeli (50 siirron sääntö).";
+      msgRow(t); setEvalBar(null); return;
+    }
+    if (!engineReady) { msgRow("Moottori latautuu…"); return; }
+    if (isBlocked()) { msgRow("Vastustajan vuoro. Syötä vastustajan siirto laudalle."); setEvalBar(null); return; }
+    for (let k = 0; k < rows; k++) {
+      const l = curFen ? lines[k] : null;
+      if (!l) {
+        // paikkamerkki, kunnes moottorilta tulee tämä vaihtoehto
+        const ph = document.createElement("div"); ph.className = "line ph";
+        const chip = document.createElement("span"); chip.className = "chip"; chip.style.background = "var(" + ARROW_COLORS[k] + ")"; chip.style.opacity = ".35";
+        const ev = document.createElement("span"); ev.className = "ev"; ev.style.visibility = "hidden"; ev.textContent = "0.00";
+        const pv = document.createElement("span"); pv.className = "pv"; pv.textContent = k === 0 ? "Lasketaan…" : "";
+        ph.append(chip, ev, pv);
+        linesEl.appendChild(ph);
+        continue;
+      }
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "line";
+      const chip = document.createElement("span"); chip.className = "chip"; chip.style.background = "var(" + ARROW_COLORS[k] + ")";
+      const ev = document.createElement("span"); ev.className = "ev" + (l.v >= 0 ? " pos" : ""); ev.textContent = evalText(l);
+      const pv = document.createElement("span"); pv.className = "pv";
+      if (state.beginner) {
+        const d = describeMove(curFen, l.pv[0]);
+        pv.append("Paras siirto ", Object.assign(document.createElement("b"), { textContent: d.san }), ": " + d.text + ".");
+      } else pvToSan(curFen, l.pv, 9).forEach((m, i) => {
+        if (m.prefix) pv.appendChild(document.createTextNode(m.prefix));
+        if (i === 0) { const s = document.createElement("b"); s.textContent = m.san; pv.appendChild(s); }
+        else pv.appendChild(document.createTextNode(m.san));
+        pv.appendChild(document.createTextNode(" "));
+      });
+      b.append(chip, ev, pv);
+      b.title = "Pelaa ensimmäinen siirto";
+      b.addEventListener("click", () => {
+        const u = l.pv[0];
+        playMove({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] });
+      });
+      linesEl.appendChild(b);
+    }
+    setEvalBar(curFen ? lines[0] : null);
+  }
+
+  const shownLines = () => (state.beginner ? 1 : state.multipv);
+
+  function setVerdict(l) {
+    const el = $("verdict");
+    if (!l) { el.hidden = true; return; }
+    let text;
+    if (l.type === "mate") {
+      text = (l.v > 0 ? "Valkea" : "Musta") + " tekee matin " + Math.abs(l.v) + " siirrossa";
+    } else {
+      const a = Math.abs(l.v), side = l.v > 0 ? "Valkealla" : "Mustalla";
+      if (a < 30) text = "Tasainen asema";
+      else if (a < 70) text = side + " pieni etu";
+      else if (a < 150) text = side + " selvä etu";
+      else if (a < 300) text = side + " suuri etu";
+      else text = side + " voittava asema";
+    }
+    const mine = l.type === "mate" ? l.v : (Math.abs(l.v) < 30 ? 0 : l.v);
+    let note = "";
+    if (mine !== 0) note = (mine > 0) === (state.myColor === "w") ? "sinun eduksesi" : "vastustajan eduksi";
+    el.replaceChildren(document.createTextNode(state.beginner ? text : text + " (" + evalText(l) + ")"));
+    if (note) { const s = document.createElement("small"); s.textContent = note; el.appendChild(s); }
+    el.hidden = false;
+  }
+
+  function setEvalBar(l) {
+    $("evalbar").classList.toggle("off", assistOff());
+    // uuden aseman laskennan ajaksi palkki jää edelliseen arvoon eikä käy välillä puolivälissä
+    if (!l && !view.game_over() && !assistOff() && !isBlocked()) return;
+    setVerdict(l && !view.game_over() ? l : null);
+    let pct = 50;
+    if (view.in_checkmate()) pct = view.turn() === "w" ? 0 : 100;
+    else if (l) pct = l.type === "mate" ? (l.v > 0 ? 100 : 0) : 100 / (1 + Math.exp(-l.v / 250));
+    $("evalfill").style.height = pct.toFixed(1) + "%";
+  }
+
+  // ---------- Nuolet ----------
+  function arrowPoly(uci, w, hw, hl) {
+    const a = squareXY(uci.slice(0, 2)), b = squareXY(uci.slice(2, 4));
+    const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy);
+    const ux = dx / len, uy = dy / len, nx = -uy, ny = ux;
+    const ex = b.x - ux * 0.12, ey = b.y - uy * 0.12; // kärki hieman ennen ruudun keskustaa
+    const bx = ex - ux * hl, by = ey - uy * hl;
+    const sx = a.x + ux * 0.18, sy = a.y + uy * 0.18;
+    const pts = [
+      [sx + nx * w / 2, sy + ny * w / 2], [bx + nx * w / 2, by + ny * w / 2], [bx + nx * hw / 2, by + ny * hw / 2],
+      [ex, ey], [bx - nx * hw / 2, by - ny * hw / 2], [bx - nx * w / 2, by - ny * w / 2], [sx - nx * w / 2, sy - ny * w / 2]
+    ];
+    const poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+    poly.setAttribute("points", pts.map((p) => p[0].toFixed(3) + "," + p[1].toFixed(3)).join(" "));
+    poly.setAttribute("stroke-linejoin", "round");
+    return poly;
+  }
+
+  function drawArrows() {
+    arrowsEl.replaceChildren();
+    if (assistOff()) {
+      // pelin aikana vain pyydetty vihje
+      const l = lines[0];
+      if (play.hintFen && play.hintFen === view.fen() && curFen === view.fen() && l && l.pv[0]) {
+        const poly = arrowPoly(l.pv[0], 0.2, 0.5, 0.42);
+        poly.setAttribute("fill", cssVar("--a1"));
+        poly.setAttribute("fill-opacity", "0.9");
+        poly.setAttribute("stroke", "rgba(0,0,0,.35)");
+        poly.setAttribute("stroke-width", "0.02");
+        arrowsEl.appendChild(poly);
+      }
+      return;
+    }
+    const better = reviewArrow();
+    if (better) {
+      const poly = arrowPoly(better, 0.16, 0.44, 0.38);
+      poly.setAttribute("fill", cssVar("--q-best"));
+      poly.setAttribute("fill-opacity", "0.28");
+      poly.setAttribute("stroke", cssVar("--q-best"));
+      poly.setAttribute("stroke-width", "0.05");
+      poly.setAttribute("stroke-dasharray", "0.12 0.08");
+      arrowsEl.appendChild(poly);
+    }
+    if (!curFen || curFen !== view.fen() || isBlocked()) return;
+    for (let k = Math.min(shownLines(), lines.length) - 1; k >= 0; k--) {
+      const l = lines[k];
+      if (!l || !l.pv[0]) continue;
+      const poly = k === 0 ? arrowPoly(l.pv[0], 0.2, 0.5, 0.42) : arrowPoly(l.pv[0], 0.14, 0.4, 0.36);
+      poly.setAttribute("fill", cssVar(ARROW_COLORS[k]));
+      poly.setAttribute("fill-opacity", k === 0 ? "0.9" : "0.72");
+      poly.setAttribute("stroke", "rgba(0,0,0,.35)");
+      poly.setAttribute("stroke-width", "0.02");
+      arrowsEl.appendChild(poly);
+    }
+  }
+
+  // ---------- Ohje ----------
+  let helpReturn = null;
+  function openHelp() {
+    helpReturn = document.activeElement;
+    $("help").hidden = false;
+    document.body.style.overflow = "hidden";
+    $("helpClose").focus();
+  }
+  function closeHelp() {
+    $("help").hidden = true;
+    document.body.style.overflow = "";
+    if (helpReturn && helpReturn.focus) helpReturn.focus();
+  }
+  $("helpBtn").addEventListener("click", openHelp);
+  document.querySelectorAll("[data-help]").forEach((b) => b.addEventListener("click", openHelp));
+  $("helpClose").addEventListener("click", closeHelp);
+  $("help").addEventListener("click", (e) => { if (e.target.id === "help") closeHelp(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("help").hidden) closeHelp(); });
+
+  // ---------- Näyttö päällä (puhelimessa) ----------
+  async function keepAwake() {
+    try { if ("wakeLock" in navigator && document.visibilityState === "visible") await navigator.wakeLock.request("screen"); }
+    catch (e) { /* ei tuettu tai estetty */ }
+  }
+  document.addEventListener("visibilitychange", keepAwake);
+
+  // ---------- Välilehdet ----------
+  const TAB_KEY = "shakkivalmentaja.tab";
+  const wideQuery = window.matchMedia("(min-width: 761px)");
+  let activeTab = "now";
+  try { activeTab = localStorage.getItem(TAB_KEY) || "now"; } catch (e) { /* ignore */ }
+
+  function setTab(t, remember = true) {
+    if (!["now", "moves", "ana", "more"].includes(t)) t = "now";
+    if (wideQuery.matches && t === "moves") t = "now"; // leveällä siirrot näkyvät Suositus-välilehdellä
+    activeTab = t;
+    if (remember) { try { localStorage.setItem(TAB_KEY, t); } catch (e) { /* ignore */ } }
+    document.querySelectorAll(".tab").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.t === t)));
+    document.querySelectorAll("#tabBody > [data-tab]").forEach((sec) => {
+      const tab = sec.dataset.tab;
+      sec.classList.toggle("on", tab === t || (wideQuery.matches && t === "now" && tab === "moves"));
+    });
+    $("tabBody").scrollTop = 0;
+    fitPanel();
+    if (t === "ana") { anaSig = ""; renderAnalysis(); }
+    if (t === "moves" || (t === "now" && wideQuery.matches)) renderMoves();
+  }
+  document.querySelector(".tabs").addEventListener("click", (e) => {
+    const b = e.target.closest(".tab");
+    if (b) setTab(b.dataset.t);
+  });
+  // nuolinäppäimet välilehtipalkissa (saavutettavuus)
+  document.querySelector(".tabs").addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.stopPropagation(); e.preventDefault();
+    const tabs = [...document.querySelectorAll(".tab")].filter((b) => b.offsetParent !== null);
+    const i = tabs.findIndex((b) => b.dataset.t === activeTab);
+    const next = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+    setTab(next.dataset.t); next.focus();
+  });
+
+  // Sisältöalue täyttää näytön välilehtipalkin alla, joten sivua ei tarvitse vierittää
+  function fitPanel() {
+    const body = $("tabBody");
+    const top = body.getBoundingClientRect().top + window.scrollY;
+    const avail = Math.max(200, Math.floor(window.innerHeight - top - 4));
+    body.style.maxHeight = avail + "px";
+    body.style.setProperty("--avail", avail + "px");
+  }
+  window.addEventListener("resize", () => { fitPanel(); });
+  wideQuery.addEventListener("change", () => setTab(activeTab, false));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitPanel);
+
+  // Avattujen työkaluosioiden tila muistetaan tällä laitteella
+  document.querySelectorAll("details.fold").forEach((d) => {
+    try { if (localStorage.getItem("shakkivalmentaja.fold." + d.id) === "1") d.open = true; } catch (e) { /* ignore */ }
+    d.addEventListener("toggle", () => {
+      try { localStorage.setItem("shakkivalmentaja.fold." + d.id, d.open ? "1" : "0"); } catch (e) { /* ignore */ }
+    });
+  });
+
+  // ---------- Käynnistys ----------
+  keepAwake();
+  restore();
+  syncSettingsUI();
+  syncFetchUI();
+  syncEngineTexts();
+  setTab(activeTab, false);
+  rebuildView();
+  renderAll();
+  fitPanel(); // laudan piirron jälkeen tiedetään, mistä välilehtialue alkaa
+  initEngine();
+  maybeEngineMove(); // jatketaan keskeneräistä peliä, jos koneen vuoro
+})();
+</script>

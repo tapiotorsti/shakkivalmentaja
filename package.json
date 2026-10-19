@@ -1,0 +1,14 @@
+{
+  "name": "shakkivalmentaja",
+  "private": true,
+  "description": "Shakkilauta, johon syötät siirrot ja Stockfish näyttää parhaat jatkot nuolina.",
+  "scripts": {
+    "build": "node build.js",
+    "test": "node tests/run.mjs",
+    "test:offline": "node tests/run.mjs --offline",
+    "deploy": "firebase deploy --only hosting"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

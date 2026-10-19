@@ -1,0 +1,11 @@
+# build.js tuottaa nämä shakkivalmentaja.html-tiedostosta
+public/index.html
+public/sw.js
+
+# Firebase CLI:n välimuisti
+.firebase/
+
+# Testien kuvakaappaukset
+tests/output/
+
+node_modules/

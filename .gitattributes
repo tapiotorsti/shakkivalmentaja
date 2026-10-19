@@ -1,0 +1,6 @@
+# Tekstitiedostot LF-rivinvaihdoilla kaikilla alustoilla
+* text=auto eol=lf
+
+# Binääritiedostot sellaisenaan
+*.wasm binary
+*.png binary
