@@ -1,6 +1,6 @@
 # Shakkivalmentaja
 
-Shakkilauta, johon syötetään siirrot ja Stockfish näyttää parhaat jatkot nuolina. Sovellus analysoi koko pelin, merkitsee virheet, hakee omat pelit Lichessistä ja Chess.comista, ja sillä voi pelata konetta vastaan. Pelikirjasto tallentaa analysoidut pelit laitteelle (IndexedDB), ja omista virheistä kootaan kertaavia harjoitustehtäviä. Aloittelijatila selittää siirrot sanoin.
+Shakkilauta, johon syötetään siirrot ja Stockfish näyttää parhaat jatkot nuolina. Sovellus analysoi koko pelin, merkitsee virheet, hakee omat pelit Lichessistä ja Chess.comista, ja sillä voi pelata konetta vastaan. Pelikirjasto tallentaa analysoidut pelit laitteelle (IndexedDB), ja omista virheistä kootaan kertaavia harjoitustehtäviä. Aloittelijatila selittää siirrot sanoin, ja Opi pelaamaan -opetus näyttää tehtävinä, miten kukin nappula liikkuu.
 
 Sovellus: https://shakkivalmentaja.web.app
 
