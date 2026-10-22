@@ -32,6 +32,7 @@ const TESTS = [
   { name: "asettelun vakaus", file: "layout-shift.mjs" },
   { name: "analyysi", file: "analysis.mjs", args: () => [join(OUT, "analyysi.png")] },
   { name: "peli", file: "play.mjs", args: () => [join(OUT, "peli.png")] },
+  { name: "kirjasto ja harjoitus", file: "library.mjs", args: () => [join(OUT, "kirjasto.png")] },
   { name: "aloittelija ja haku", file: "features.mjs", network: true, args: () => [join(OUT, "aloittelija.png")] },
 ];
 
@@ -101,6 +102,16 @@ function stopChrome(chrome) {
   } else chrome.kill("SIGKILL");
 }
 
+// Suljetaan edellisen testin sivut, etteivät niiden tietokantayhteydet tai moottorit vaikuta seuraavaan
+async function closePages() {
+  try {
+    // ensin uusi tyhjä sivu: headless-Chrome sulkeutuu, jos viimeinenkin sivu suljetaan
+    const keep = await (await fetch(CDP_URL + "/json/new?about:blank", { method: "PUT" })).json();
+    const list = await (await fetch(CDP_URL + "/json/list")).json();
+    await Promise.all(list.filter((p) => p.type === "page" && p.id !== keep.id).map((p) => fetch(CDP_URL + "/json/close/" + p.id).catch(() => {})));
+  } catch (e) { /* Chrome ei vastaa: seuraava testi kertoo virheen */ }
+}
+
 function runTest(t) {
   return new Promise((resolve) => {
     const started = Date.now();
@@ -136,6 +147,7 @@ try {
   console.log(`Palvelin ${APP_URL}, Chrome ${CDP_URL}\n`);
   for (const t of selected) {
     process.stdout.write(`▶ ${t.name}${t.network ? " (verkko)" : ""} … `);
+    await closePages();
     const r = await runTest(t);
     results.push(r);
     console.log(r.ok ? `ok (${r.oks} tarkistusta, ${r.secs} s)` : `EPÄONNISTUI (${r.secs} s)`);

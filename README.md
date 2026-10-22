@@ -1,6 +1,6 @@
 # Shakkivalmentaja
 
-Shakkilauta, johon syötetään siirrot ja Stockfish näyttää parhaat jatkot nuolina. Sovellus analysoi koko pelin, merkitsee virheet, hakee omat pelit Lichessistä ja Chess.comista, ja sillä voi pelata konetta vastaan. Aloittelijatila selittää siirrot sanoin.
+Shakkilauta, johon syötetään siirrot ja Stockfish näyttää parhaat jatkot nuolina. Sovellus analysoi koko pelin, merkitsee virheet, hakee omat pelit Lichessistä ja Chess.comista, ja sillä voi pelata konetta vastaan. Pelikirjasto tallentaa analysoidut pelit laitteelle (IndexedDB), ja omista virheistä kootaan kertaavia harjoitustehtäviä. Aloittelijatila selittää siirrot sanoin.
 
 Sovellus: https://shakkivalmentaja.web.app
 
@@ -31,5 +31,6 @@ Aja `npm test` ennen julkaisua.
 
 ## Huomioita
 
+- Chess.comin kuluvan kuukauden arkisto voi palauttaa virheen, vaikka käyttäjä on olemassa. Haku ohittaa virheelliset kuukaudet ja hakee aiemmista.
 - Lichessin rajapinta palauttaa 404, jos selaimen tunniste on `HeadlessChrome` tai curlin oletus. Testit vaihtavat tunnisteen tavalliseksi Chromeksi. Oikeilla käyttäjillä haku toimii normaalisti.
 - Moottorin vaihtuessa tarkista `ENGINE_INFO` (`build.js`): Stockfish 10:n arvot skaalataan kertoimella 0,7 (`cpScale`), uusilla versioilla kerroin on 1.

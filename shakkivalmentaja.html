@@ -356,6 +356,23 @@ svg.arrows { position: absolute; inset: 0; width: 100%; height: 100%; pointer-ev
   .tab[data-t="moves"] { display: none; }
 }
 
+/* Pelikirjasto ja harjoitukset */
+.libhead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.libhead h2 { margin-bottom: 8px; }
+#libList:empty { display: none; }
+.librow { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.librow + .librow { border-top: 1px solid var(--line); }
+.librow .grow { border: 0; }
+.librow .del { margin-right: 8px; color: var(--q-blunder); }
+.prcard { display: grid; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.prcard p { margin: 0; }
+.prcard .big { font: 700 1.05rem/1.3 var(--font-display); }
+.prcard .row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.prnote { margin: 0; font-size: .92rem; min-height: 1.3em; }
+.prnote.win { color: var(--accent); font-weight: 600; }
+.prnote.miss { color: var(--q-mistake); font-weight: 600; }
+.sq.hintsq { box-shadow: inset 0 0 0 4px var(--a1); }
+
 /* Aloittelijatila */
 .bswitch {
   display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
@@ -707,6 +724,7 @@ label.btn { cursor: pointer; }
       <button class="tab" role="tab" type="button" data-t="now" aria-selected="true">Suositus</button>
       <button class="tab" role="tab" type="button" data-t="moves" aria-selected="false">Siirrot</button>
       <button class="tab" role="tab" type="button" data-t="ana" aria-selected="false">Analyysi</button>
+      <button class="tab" role="tab" type="button" data-t="games" aria-selected="false">Pelit</button>
       <button class="tab" role="tab" type="button" data-t="more" aria-selected="false">Lisää</button>
     </div>
     <div class="tabbody" id="tabBody" role="tabpanel">
@@ -718,6 +736,15 @@ label.btn { cursor: pointer; }
         <div class="play-actions" id="playActions"></div>
       </div>
       <p class="msg" id="playMsg"></p>
+    </section>
+
+    <section class="section live-play" id="practiceSec" data-tab="now" hidden>
+      <div class="play">
+        <div class="vs" id="prHead"></div>
+        <p class="pstate" id="prState"></p>
+        <p class="prnote" id="prNote"></p>
+        <div class="play-actions" id="prActions"></div>
+      </div>
     </section>
 
     <section class="section" data-tab="now">
@@ -763,6 +790,20 @@ label.btn { cursor: pointer; }
         <h3 class="subh">Käännekohdat</h3>
         <div class="rows" id="turns"></div>
       </div>
+    </section>
+
+    <section class="section" data-tab="games">
+      <h2>Harjoittele virheitäsi</h2>
+      <div class="prcard" id="prCard"><p class="hint">Ladataan…</p></div>
+    </section>
+
+    <section class="section" data-tab="games">
+      <div class="libhead">
+        <h2>Pelikirjasto</h2>
+        <button class="linkbtn" id="libEdit" type="button" hidden>Muokkaa</button>
+      </div>
+      <div class="rows" id="libList"></div>
+      <p class="hint" id="libNote"></p>
     </section>
 
     <div class="tools" data-tab="more">
@@ -948,6 +989,7 @@ label.btn { cursor: pointer; }
         <li><b>Suositus:</b> moottorin paras siirto, tilanne sanoin ja juuri tehdyn siirron arvio. Pelissä konetta vastaan myös pelin tilanne. Tietokoneella tällä välilehdellä on myös siirtolista.</li>
         <li><b>Siirrot:</b> pelin siirrot ja sivuvariantit. Napauta siirtoa, niin lauta siirtyy siihen asemaan.</li>
         <li><b>Analyysi:</b> arviokäyrä, tarkkuus ja käännekohdat. Tuotu tai haettu peli avautuu tänne.</li>
+        <li><b>Pelit:</b> pelikirjasto ja omista virheistä kootut harjoitustehtävät.</li>
         <li><b>Lisää:</b> uusi peli, peli konetta vastaan, pelien haku ja tuonti, asetukset ja nappuloiden arvot.</li>
       </ul>
       <p>Laudan alla ovat selauspainikkeet sekä siirron peruminen ja laudan kääntö.</p>
@@ -961,6 +1003,23 @@ label.btn { cursor: pointer; }
         <li><b>Vähemmän numeroita:</b> arvioluvut, laskentasyvyys ja FEN-kenttä piilotetaan. Tilanne kerrotaan sanoin, esim. "Valkealla selvä etu".</li>
       </ul>
       <p>Kun shakki alkaa tuntua tutulta, kytke tila pois, niin näet kaikki luvut ja vaihtoehdot.</p>
+
+      <h3>Pelikirjasto</h3>
+      <ul>
+        <li>Jokainen peli, jossa on vähintään neljä puolisiirtoa, tallentuu automaattisesti <b>Pelit</b>-välilehdelle arvioineen. Tämä koskee haettuja, tuotuja, konetta vastaan pelattuja ja itse syötettyjä pelejä.</li>
+        <li>Napauta peliä, niin se avautuu Analyysiin valmiiksi arvioituna, eikä moottorin tarvitse laskea uudelleen.</li>
+        <li>Samaa Lichess- tai Chess.com-peliä ei tallenneta kahdesti. <b>Muokkaa</b> näyttää poistopainikkeet.</li>
+        <li>Kirjasto on tällä laitteella ja tässä selaimessa. Se ei siirry toiselle laitteelle.</li>
+      </ul>
+
+      <h3>Harjoittele virheitäsi</h3>
+      <ul>
+        <li>Kun pelin analyysi valmistuu, sovellus poimii asemat, joissa teit virheen <span class="q mistake">?</span> tai mokan <span class="q blunder">??</span>, ja tekee niistä tehtäviä.</li>
+        <li>Tehtävässä lauta on asemassa ennen virhettäsi. Etsi parempi siirto. Myös muu kuin moottorin paras siirto hyväksytään, jos se on lähes yhtä hyvä. Moottori tarkistaa sen.</li>
+        <li><b>Vihje</b> korostaa siirrettävän nappulan. <b>Näytä ratkaisu</b> näyttää parhaan siirron nuolena. Väärästä yrityksestä kerrotaan, mitä vastustaja voisi tehdä.</li>
+        <li>Kertaus: ensimmäisellä yrityksellä ilman vihjettä ratkaistu tehtävä palaa 1, 3, 7 ja lopulta 21 päivän päästä. Väärin mennyt tai vihjeellä ratkaistu tulee pian uudelleen. Yhdellä kierroksella on enintään 10 tehtävää.</li>
+        <li>Harjoitus ei muuta varsinaista peliäsi. Se palaa laudalle, kun lopetat harjoituksen.</li>
+      </ul>
 
       <h3>Omien pelien haku</h3>
       <ul>
@@ -1079,18 +1138,22 @@ label.btn { cursor: pointer; }
 
   const game = new Chess();
   const isTouch = window.matchMedia && matchMedia("(pointer: coarse)").matches;
-  const state = { myColor: "w", flipped: false, onlyMine: false, depth: isTouch ? 14 : 16, multipv: 3, beginner: false };
+  const state = { myColor: "w", flipped: false, onlyMine: false, depth: isTouch ? 14 : 16, multipv: 3, beginner: false, gameId: null };
   let selected = null, legalFromSel = [], pendingPromo = null;
 
   // ---------- Tallennus ----------
   function save() {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify({
-        pgn: game.pgn(), myColor: state.myColor, flipped: state.flipped,
+        pgn: practice.active && practice.snapshot ? practice.snapshot.pgn : game.pgn(),
+        myColor: practice.active && practice.snapshot ? practice.snapshot.myColor : state.myColor,
+        flipped: practice.active && practice.snapshot ? practice.snapshot.flipped : state.flipped,
+        gameId: practice.active && practice.snapshot ? practice.snapshot.gameId : state.gameId,
         onlyMine: state.onlyMine, depth: state.depth, multipv: state.multipv, beginner: state.beginner,
         play: { active: play.active, level: play.level, human: play.human, pick: play.pick, hints: play.hints }
       }));
     } catch (e) { /* ei tallennusta, ei haittaa */ }
+    scheduleLibrarySave();
   }
   function restore() {
     try {
@@ -1102,6 +1165,7 @@ label.btn { cursor: pointer; }
         flipped: !!s.flipped,
         onlyMine: !!s.onlyMine,
         beginner: !!s.beginner,
+        gameId: s.gameId || null,
         depth: Math.min(22, Math.max(8, +s.depth || state.depth)),
         multipv: [1, 2, 3].includes(+s.multipv) ? +s.multipv : 3
       });
@@ -1153,6 +1217,7 @@ label.btn { cursor: pointer; }
         if ((FILES.indexOf(file) + rank) % 2 === 1) el.classList.add("dark");
         if (last && (last.from === sq || last.to === sq)) el.classList.add("last");
         if (selected === sq) el.classList.add("sel");
+        if (practice.active && practice.hintSq === sq && view.fen() === (practice.puzzle && practice.puzzle.fen)) el.classList.add("hintsq");
         if (checkSq === sq) el.classList.add("check");
         const p = view.get(sq);
         const warn = dangers.get(sq);
@@ -1695,7 +1760,7 @@ label.btn { cursor: pointer; }
       const t = document.createElement("span"); t.className = "navtag"; t.textContent = "Sivuvariantti"; label.appendChild(t);
     }
     const pos = positions();
-    label.append(ply ? moveLabel(pos, ply - 1) : "Alkuasema");
+    label.append(ply ? moveLabel(pos, ply - 1) : practice.active ? "Tehtävä" : "Alkuasema");
     const c = document.createElement("small");
     c.textContent = ply === n ? (n ? " · viimeisin" : "") : " · " + ply + "/" + n;
     label.appendChild(c);
@@ -1708,7 +1773,7 @@ label.btn { cursor: pointer; }
     el.replaceChildren();
     if (assistOff()) {
       el.className = "review empty";
-      el.textContent = "Siirtojen arviot näkyvät, kun peli päättyy.";
+      el.textContent = practice.active ? "Arvio näkyy, kun tehtävä on ratkaistu." : "Siirtojen arviot näkyvät, kun peli päättyy.";
       return;
     }
     if (!n || !ply) {
@@ -1809,7 +1874,7 @@ label.btn { cursor: pointer; }
     const onMain = !variation || curPly() <= variation.base;
     if (assistOff()) {
       anaSig = "";
-      $("anaEmpty").textContent = "Analyysi avautuu, kun peli päättyy. Moottori arvioi siirtoja jo taustalla.";
+      $("anaEmpty").textContent = practice.active ? "Analyysi on piilossa tehtävän ajan." : "Analyysi avautuu, kun peli päättyy. Moottori arvioi siirtoja jo taustalla.";
       $("anaEmpty").hidden = false;
       $("anaBody").hidden = true;
       return;
@@ -2031,6 +2096,8 @@ label.btn { cursor: pointer; }
   function applyImport(pgn, me) {
     stopPlayMode();
     game.load_pgn(pgn, PGN_OPTS);
+    state.gameId = gameKey();
+    mergeLibraryEvals(state.gameId); // aiemmin analysoitu peli avautuu valmiina
     variation = null; viewPly = null; selected = null; legalFromSel = [];
     anaSig = "";
     if (me) {
@@ -2075,6 +2142,7 @@ label.btn { cursor: pointer; }
     renderReview();
     drawArrows();
     renderPlay();
+    renderPractice();
   }
 
   // ---------- Siirtojen syöttö ----------
@@ -2086,6 +2154,8 @@ label.btn { cursor: pointer; }
 
   function onSquare(sq) {
     if (view.game_over()) return;
+    // Harjoituksessa siirron voi tehdä vain tehtävän asemassa
+    if (practice.active && !practice.resolved && (practice.checking || !practice.puzzle || view.fen() !== practice.puzzle.fen)) return;
     // Pelissä konetta vastaan siirron voi tehdä vain omalla vuorolla viimeisimmässä asemassa
     if (assistOff()) {
       if (viewPly !== null || variation) { playMsg("Palaa viimeisimpään siirtoon jatkaaksesi peliä."); return; }
@@ -2133,6 +2203,7 @@ label.btn { cursor: pointer; }
   // kuin pelissä vain etenee, ja eri siirto aloittaa sivuvariantin, joten pelin loppuosa säilyy.
   function playMove(m) {
     selected = null; legalFromSel = [];
+    if (practice.active && !practice.resolved) { practiceMove(m); return; }
     const res = new Chess(view.fen()).move(m);
     if (!res) { renderBoard(); return; }
     const ms = activeMoves(), ply = curPly();
@@ -2177,6 +2248,7 @@ label.btn { cursor: pointer; }
     clearTimeout(newArmed); newArmed = null;
     btn.textContent = "Uusi peli"; btn.classList.remove("warn");
     stopPlayMode();
+    state.gameId = newGameId();
     game.reset(); variation = null; viewPly = null; selected = null; legalFromSel = [];
     save(); rebuildView(); renderAll(); analyze();
   });
@@ -2216,6 +2288,7 @@ label.btn { cursor: pointer; }
     const msg = $("fenMsg");
     if (!v.valid) { msg.textContent = "FEN ei kelpaa: " + v.error; msg.className = "msg err"; return; }
     stopPlayMode();
+    state.gameId = newGameId();
     game.load(fen); variation = null; viewPly = null; selected = null; legalFromSel = [];
     msg.textContent = "Asema ladattu."; msg.className = "msg";
     save(); rebuildView(); renderAll(); analyze();
@@ -2270,8 +2343,11 @@ label.btn { cursor: pointer; }
     const base = "https://api.chess.com/pub/player/" + encodeURIComponent(user.toLowerCase()) + "/games/archives";
     const archives = (await getJson(base)).archives || [];
     const out = [];
-    for (let i = archives.length - 1; i >= 0 && out.length < 20 && i >= archives.length - 3; i--) {
-      const month = (await getJson(archives[i])).games || [];
+    let failed = 0;
+    for (let i = archives.length - 1; i >= 0 && out.length < 20 && i >= archives.length - 4; i--) {
+      // yksittäisen kuukauden arkisto voi palauttaa virheen Chess.comin päässä: ohitetaan ja haetaan aiemmista
+      let month;
+      try { month = (await getJson(archives[i])).games || []; } catch (e) { failed++; continue; }
       month.filter((g) => g.rules === "chess" && g.pgn).reverse().forEach((g) => {
         if (out.length >= 20) return;
         const eco = (g.pgn.match(/\[ECOUrl "[^"]*\/openings\/([^"]+)"\]/) || [])[1];
@@ -2283,6 +2359,7 @@ label.btn { cursor: pointer; }
         });
       });
     }
+    if (!out.length && failed) throw new FetchError("http"); // kaikki kuukaudet epäonnistuivat
     return out;
   }
 
@@ -2382,7 +2459,7 @@ label.btn { cursor: pointer; }
   const RESULTS = ["1-0", "0-1", "1/2-1/2"];
   const play = { active: false, level: 3, human: "w", pick: "w", hints: 0, thinking: false, token: 0, hintFen: null };
   const playOver = () => game.game_over() || RESULTS.includes(game.header().Result);
-  const assistOff = () => play.active && !playOver();
+  const assistOff = () => (play.active && !playOver()) || (practice.active && !practice.resolved);
   const levelLabel = (lv) => "Stockfish taso " + lv + " (" + LEVELS[lv - 1].name + ")";
   let opp = null, oppJob = null, oppIgnore = 0;
 
@@ -2417,8 +2494,9 @@ label.btn { cursor: pointer; }
   }
 
   function onOppLine(line) {
+    if (line.startsWith("bestmove") && oppIgnore > 0) { oppIgnore--; return; } // peruttu haku
+    if (evalJob) { onEvalLine(line); return; }
     if (!line.startsWith("bestmove")) return;
-    if (oppIgnore > 0) { oppIgnore--; return; } // peruttu haku
     const job = oppJob;
     oppJob = null;
     if (!job) return;
@@ -2456,7 +2534,9 @@ label.btn { cursor: pointer; }
   }
 
   function startPlay() {
+    if (practice.active) { practice.active = false; practice.puzzle = null; practice.snapshot = null; }
     cancelOppMove();
+    state.gameId = newGameId();
     const human = play.pick === "r" ? (Math.random() < 0.5 ? "w" : "b") : play.pick;
     Object.assign(play, { active: true, human, hints: 0, hintFen: null });
     game.reset();
@@ -2476,6 +2556,7 @@ label.btn { cursor: pointer; }
   function stopPlayMode() {
     cancelOppMove();
     play.active = false; play.hintFen = null;
+    if (practice.active) { practice.active = false; practice.puzzle = null; practice.snapshot = null; }
   }
 
   // Peru oma siirto ja koneen vastaus
@@ -2649,7 +2730,7 @@ label.btn { cursor: pointer; }
   function scheduleRender() {
     if (rafPending) return;
     rafPending = true;
-    requestAnimationFrame(() => { rafPending = false; renderLines(); renderMovesIfChanged(); renderReview(); drawArrows(); });
+    requestAnimationFrame(() => { rafPending = false; renderLines(); renderMovesIfChanged(); renderReview(); drawArrows(); scheduleLibrarySave(); });
   }
 
   function analyze(force) {
@@ -2732,7 +2813,9 @@ label.btn { cursor: pointer; }
       linesEl.appendChild(d);
     };
     if (assistOff()) {
-      msgRow("Peli konetta vastaan on käynnissä. Moottorin apu on piilossa, kunnes peli päättyy. Vihjeen saa pelipaneelista.");
+      msgRow(practice.active
+        ? "Tehtävä käynnissä. Moottorin apu näkyy, kun tehtävä on ratkaistu."
+        : "Peli konetta vastaan on käynnissä. Moottorin apu on piilossa, kunnes peli päättyy. Vihjeen saa pelipaneelista.");
       setEvalBar(null);
       return;
     }
@@ -2852,7 +2935,8 @@ label.btn { cursor: pointer; }
       }
       return;
     }
-    const better = reviewArrow();
+    const solution = practice.active && practice.resolved && practice.puzzle && view.fen() === practice.puzzle.fen ? practice.puzzle.best : null;
+    const better = solution || reviewArrow();
     if (better) {
       const poly = arrowPoly(better, 0.16, 0.44, 0.38);
       poly.setAttribute("fill", cssVar("--q-best"));
@@ -2901,6 +2985,411 @@ label.btn { cursor: pointer; }
   }
   document.addEventListener("visibilitychange", keepAwake);
 
+  // ---------- Pelikirjasto (IndexedDB) ----------
+  // Tallennuspaikka: selaimen IndexedDB tällä laitteella. Jos se ei ole käytettävissä, kirjasto toimii vain muistissa.
+  const LIB = (() => {
+    let dbp = null;
+    const mem = { games: new Map(), puzzles: new Map() };
+    const open = () => dbp || (dbp = new Promise((resolve) => {
+      try {
+        const r = indexedDB.open("shakkivalmentaja", 1);
+        r.onupgradeneeded = () => {
+          const db = r.result;
+          if (!db.objectStoreNames.contains("games")) db.createObjectStore("games", { keyPath: "id" });
+          if (!db.objectStoreNames.contains("puzzles")) db.createObjectStore("puzzles", { keyPath: "id" });
+        };
+        r.onsuccess = () => {
+          const db = r.result;
+          // toinen välilehti päivittää tai poistaa tietokannan: suljetaan yhteys, avataan uudelleen tarvittaessa
+          db.onversionchange = () => { db.close(); dbp = null; };
+          resolve(db);
+        };
+        r.onerror = () => resolve(null);
+      } catch (e) { resolve(null); }
+    }));
+    const req = (r) => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+    const store = async (name, mode) => { const db = await open(); return db ? db.transaction(name, mode).objectStore(name) : null; };
+    return {
+      persistent: async () => !!(await open()),
+      async getAll(name) { const st = await store(name, "readonly"); return st ? req(st.getAll()) : [...mem[name].values()]; },
+      async get(name, id) { const st = await store(name, "readonly"); return st ? req(st.get(id)) : mem[name].get(id); },
+      async put(name, v) { const st = await store(name, "readwrite"); return st ? req(st.put(v)) : mem[name].set(v.id, v); },
+      async del(name, id) { const st = await store(name, "readwrite"); return st ? req(st.delete(id)) : mem[name].delete(id); },
+    };
+  })();
+
+  const newGameId = () => "g" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  // Haetuilla peleillä tunniste palvelun pelinumerosta, jotta samaa peliä ei tallenneta kahdesti
+  function gameKey() {
+    const h = game.header();
+    const li = /lichess\.org\/([A-Za-z0-9]{8})/.exec(h.Site || "");
+    if (li) return "li:" + li[1];
+    const cc = /chess\.com\/game\/(?:live|daily)\/(\d+)/.exec((h.Link || "") + " " + (h.Site || ""));
+    if (cc) return "cc:" + cc[1];
+    const moves = mainMoves().map((m) => m.from + m.to + (m.promotion || "")).join("");
+    let hash = 0;
+    for (const ch of startFen() + moves) hash = (hash * 31 + ch.charCodeAt(0)) | 0;
+    return "pgn:" + (hash >>> 0).toString(36) + moves.length;
+  }
+
+  function mergeEvals(list) {
+    (list || []).forEach(([fen, type, v, depth, best]) => {
+      const prev = evals.get(fen);
+      if (!prev || prev.depth < depth) evals.set(fen, { type, v, depth, best, score: type === "mate" ? (v > 0 ? 10000 : -10000) : v });
+    });
+  }
+  async function mergeLibraryEvals(id) {
+    try {
+      const g = await LIB.get("games", id);
+      if (g && g.evals) { mergeEvals(g.evals); anaSig = ""; scheduleRender(); }
+    } catch (e) { /* ignore */ }
+  }
+
+  function sourceOf(h) {
+    if (/lichess\.org/.test(h.Site || "")) return "Lichess";
+    if (/chess\.com/.test((h.Site || "") + (h.Link || ""))) return "Chess.com";
+    if (h.Event === "Harjoituspeli") return "Kone";
+    return "Oma";
+  }
+  function resultOfGame() {
+    const r = game.header().Result;
+    if (RESULTS.includes(r)) return r;
+    if (game.in_checkmate()) return game.turn() === "w" ? "0-1" : "1-0";
+    if (game.in_draw() || game.in_stalemate()) return "1/2-1/2";
+    return "*";
+  }
+
+  let libTimer = null, libSig = "";
+  let libDeletedPgn = null; // laudalla oleva poistettu peli tallennetaan uudelleen vasta, kun siihen tulee siirtoja
+  function scheduleLibrarySave() {
+    if (libTimer) return; // korkeintaan kerran 1,5 sekunnissa
+    libTimer = setTimeout(() => { libTimer = null; librarySave().catch(() => {}); }, 1500);
+  }
+
+  async function librarySave() {
+    if (practice.active) return;
+    const moves = mainMoves();
+    if (moves.length < 4) return;
+    if (!state.gameId) state.gameId = gameKey();
+    const pos = positionsOf(moves);
+    const ev = [];
+    pos.forEach((p) => { const e = evals.get(p.fen); if (e && e.depth >= MIN_REVIEW_DEPTH && e.depth < 99) ev.push([p.fen, e.type, e.v, e.depth, e.best]); });
+    const target = Math.min(BG_DEPTH, state.depth);
+    const complete = pos.every((p) => { const e = evalOf(p.fen); return e && e.depth >= target; });
+    const me = state.myColor;
+    const results = [];
+    for (let i = 0; i < pos.length - 1; i++) results.push(classify(i, pos));
+    const counts = { blunder: 0, mistake: 0, inacc: 0 };
+    results.forEach((r, i) => { if (r && r.kind in counts && pos[i + 1].move.color === me) counts[r.kind]++; });
+    const pgn = game.pgn();
+    if (libDeletedPgn !== null) { if (pgn === libDeletedPgn) return; libDeletedPgn = null; }
+    const sig = [state.gameId, pgn.length, ev.length, me, complete].join("|");
+    if (sig === libSig) return;
+    const h = game.header();
+    const old = await LIB.get("games", state.gameId);
+    const entry = {
+      id: state.gameId, pgn, myColor: me,
+      white: playerName("w"), black: playerName("b"), wElo: h.WhiteElo || "", bElo: h.BlackElo || "",
+      result: resultOfGame(), date: h.Date && !/\?/.test(h.Date) ? h.Date : today(), source: sourceOf(h),
+      plies: moves.length, complete, acc: complete ? accuracyOf(pos, me) : null, counts, evals: ev,
+      created: old ? old.created : Date.now(), updated: Date.now()
+    };
+    await LIB.put("games", entry);
+    libSig = sig;
+    // tehtävät vain valmiista analyysista ja päättyneistä peleistä konetta vastaan
+    if (complete && !(play.active && !playOver())) await derivePuzzles(entry, pos, results);
+    if (activeTab === "games") refreshLibraryUI();
+  }
+
+  async function derivePuzzles(entry, pos, results) {
+    const old = new Map((await LIB.getAll("puzzles")).filter((p) => p.gameId === entry.id).map((p) => [p.id, p]));
+    for (let i = 0; i < results.length; i++) {
+      const r = results[i];
+      if (!r || !["mistake", "blunder"].includes(r.kind) || r.move.color !== entry.myColor || !r.before.best) continue;
+      const id = entry.id + ":" + i;
+      const prev = old.get(id);
+      await LIB.put("puzzles", Object.assign({ box: 0, due: Date.now(), attempts: 0, solved: 0, created: Date.now() }, prev || {}, {
+        id, gameId: entry.id, fen: pos[i].fen, best: r.before.best, beforeScore: r.before.score, kind: r.kind,
+        played: fiSan(r.move.san), label: moveLabel(pos, i), color: r.move.color,
+        opp: entry.myColor === "w" ? entry.black : entry.white, date: entry.date
+      }));
+    }
+  }
+
+  // ---------- Pelit-välilehti ----------
+  let libEdit = false;
+  const fmtDate = (d) => { const m = /^(\d{4})\.(\d{2})\.(\d{2})$/.exec(d || ""); return m ? +m[3] + "." + +m[2] + "." + m[1] : d || ""; };
+
+  async function refreshLibraryUI() {
+    let games = [], puzzles = [];
+    try { [games, puzzles] = await Promise.all([LIB.getAll("games"), LIB.getAll("puzzles")]); } catch (e) { /* ignore */ }
+    const now = Date.now();
+    const due = puzzles.filter((p) => p.due <= now).length;
+
+    // harjoituskortti
+    const card = $("prCard");
+    card.replaceChildren();
+    if (!puzzles.length) {
+      card.append(el("p", "big", "Ei vielä tehtäviä"),
+        el("p", "hint", "Kun analysoit pelejäsi, virheistäsi ja mokistasi tulee tänne tehtäviä. Hae omat pelisi Lisää-välilehdeltä tai pelaa konetta vastaan."));
+    } else {
+      const next = puzzles.filter((p) => p.due > now).sort((a, b) => a.due - b.due)[0];
+      card.append(el("p", "big", due ? due + " tehtävää odottaa" : "Kaikki tehtävät tehty toistaiseksi"),
+        el("p", "hint", puzzles.length + " tehtävää " + new Set(puzzles.map((p) => p.gameId)).size + " pelistä." +
+          (!due && next ? " Seuraava kertaus " + new Date(next.due).toLocaleString("fi-FI", { weekday: "short", hour: "2-digit", minute: "2-digit" }) + "." : "")));
+      const row = el("div", "row");
+      const b = el("button", "btn primary", "Aloita harjoitus");
+      b.type = "button"; b.disabled = !due;
+      b.addEventListener("click", startPractice);
+      row.appendChild(b);
+      card.appendChild(row);
+    }
+
+    // kirjasto
+    const list = $("libList");
+    list.replaceChildren();
+    games.sort((a, b) => b.updated - a.updated);
+    $("libEdit").hidden = !games.length;
+    $("libEdit").textContent = libEdit ? "Valmis" : "Muokkaa";
+    $("libNote").textContent = games.length ? "" : "Kirjasto on tyhjä. Pelit tallentuvat tänne automaattisesti, kun niissä on vähintään neljä puolisiirtoa.";
+    games.forEach((g) => {
+      const mine = g.myColor === "w" ? "1-0" : "0-1";
+      let res = "–", cls = "";
+      if (g.result === "1/2-1/2") res = "Tasan";
+      else if (g.result === mine) { res = "Voitto"; cls = "win"; }
+      else if (RESULTS.includes(g.result)) { res = "Tappio"; cls = "loss"; }
+      const opp = g.myColor === "w" ? { name: g.black, elo: g.bElo } : { name: g.white, elo: g.wElo };
+      const wrap = el("div", "librow");
+      const b = el("button", "grow");
+      b.type = "button";
+      const o = el("span", "opp");
+      o.append((g.myColor === "w" ? "Valkeilla" : "Mustilla") + " vs " + opp.name + " ");
+      if (opp.elo) o.appendChild(el("small", null, String(opp.elo)));
+      const bits = [fmtDate(g.date), g.source];
+      bits.push(g.complete && g.acc != null ? "tarkkuus " + Math.round(g.acc) + " %" : "analyysi kesken");
+      if (g.counts && (g.counts.blunder || g.counts.mistake)) bits.push(g.counts.blunder + " ?? · " + g.counts.mistake + " ?");
+      b.append(el("span", "res " + cls, res), o, el("span", "meta", bits.join(" · ")));
+      b.addEventListener("click", () => openLibraryGame(g.id));
+      wrap.appendChild(b);
+      if (libEdit) {
+        const d = el("button", "btn quiet del", "Poista");
+        d.type = "button"; d.setAttribute("aria-label", "Poista peli vs " + opp.name);
+        d.addEventListener("click", () => deleteLibraryGame(g.id));
+        wrap.appendChild(d);
+      }
+      list.appendChild(wrap);
+    });
+  }
+  $("libEdit").addEventListener("click", () => { libEdit = !libEdit; refreshLibraryUI(); });
+
+  async function openLibraryGame(id) {
+    const g = await LIB.get("games", id);
+    if (!g) return;
+    if (assistOff() && play.active) { playMsg("Peli konetta vastaan on kesken. Lopeta tai luovuta se ensin.", true); setTab("now"); return; }
+    stopPlayMode();
+    game.load_pgn(g.pgn, PGN_OPTS);
+    mergeEvals(g.evals);
+    state.gameId = g.id;
+    state.myColor = g.myColor; state.flipped = g.myColor === "b";
+    variation = null; viewPly = null; selected = null; legalFromSel = [];
+    anaSig = ""; libSig = "";
+    syncSettingsUI(); save(); rebuildView(); renderAll(); analyze();
+    setTab("ana");
+  }
+
+  async function deleteLibraryGame(id) {
+    await LIB.del("games", id);
+    const puzzles = (await LIB.getAll("puzzles")).filter((p) => p.gameId === id);
+    for (const p of puzzles) await LIB.del("puzzles", p.id);
+    if (state.gameId === id) { state.gameId = newGameId(); libSig = ""; libDeletedPgn = game.pgn(); } // nykyinen peli tallentuu uutena vasta, jos sitä jatketaan
+    refreshLibraryUI();
+  }
+
+  // ---------- Harjoittele virheitäsi ----------
+  // Kertausvälit laatikoittain: 0 = uusi tai epäonnistunut (10 min), sitten 1, 3, 7 ja 21 päivää
+  const BOX_MS = [10 * 60000, 86400000, 3 * 86400000, 7 * 86400000, 21 * 86400000];
+  const practice = {
+    active: false, queue: [], idx: 0, puzzle: null, snapshot: null,
+    attempts: 0, hinted: false, hintSq: null, resolved: false, revealed: false, checking: false, finished: false,
+    correct: 0, done: 0, note: "", noteCls: ""
+  };
+  let evalJob = null;
+
+  async function startPractice() {
+    const now = Date.now();
+    const due = (await LIB.getAll("puzzles")).filter((p) => p.due <= now).sort((a, b) => a.box - b.box || a.due - b.due);
+    if (!due.length) { refreshLibraryUI(); return; }
+    if (play.active && !playOver()) { setTab("now"); playMsg("Peli konetta vastaan on kesken. Lopeta tai luovuta se ensin.", true); return; }
+    stopPlayMode();
+    await librarySave().catch(() => {});
+    practice.snapshot = { pgn: game.pgn(), myColor: state.myColor, flipped: state.flipped, gameId: state.gameId };
+    Object.assign(practice, { active: true, queue: due.slice(0, 10), idx: 0, correct: 0, done: 0, finished: false });
+    setTab("now");
+    loadPuzzle();
+  }
+
+  function loadPuzzle() {
+    const p = practice.queue[practice.idx];
+    Object.assign(practice, { puzzle: p, attempts: 0, hinted: false, hintSq: null, resolved: false, revealed: false, checking: false, note: "", noteCls: "" });
+    game.load(p.fen);
+    variation = null; viewPly = null; selected = null; legalFromSel = [];
+    state.myColor = p.color; state.flipped = p.color === "b";
+    syncSettingsUI(); rebuildView(); renderAll(); analyze();
+  }
+
+  function exitPractice() {
+    const snap = practice.snapshot;
+    Object.assign(practice, { active: false, puzzle: null, snapshot: null, finished: false });
+    if (evalJob && opp) { opp.postMessage("stop"); }
+    if (snap) {
+      if (snap.pgn && snap.pgn.trim()) game.load_pgn(snap.pgn, PGN_OPTS); else game.reset();
+      state.myColor = snap.myColor; state.flipped = snap.flipped; state.gameId = snap.gameId;
+    }
+    variation = null; viewPly = null; selected = null; legalFromSel = [];
+    libSig = "";
+    syncSettingsUI(); save(); rebuildView(); renderAll(); analyze(true);
+    refreshLibraryUI();
+  }
+
+  // Arvioi aseman pelaajan siirron jälkeen vastustajan moottorilla (täysi vahvuus, syvyys 12)
+  function evalAfterMove(fen, uci) {
+    return new Promise((resolve) => {
+      const c = new Chess(fen);
+      if (!c.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] })) { resolve(null); return; }
+      const after = c.fen();
+      if (c.game_over()) { resolve({ score: c.in_checkmate() ? (c.turn() === "w" ? -10000 : 10000) : 0, reply: null, after }); return; }
+      const w = oppEngine();
+      if (!w) { resolve(null); return; }
+      evalJob = { resolve, after, turn: c.turn(), score: 0 };
+      w.postMessage("setoption name Skill Level value 20");
+      w.postMessage("position fen " + after);
+      w.postMessage("go depth 12");
+      setTimeout(() => { if (evalJob && evalJob.resolve === resolve) w.postMessage("stop"); }, 10000);
+    });
+  }
+  function onEvalLine(line) {
+    const sm = / score (cp|mate) (-?\d+)/.exec(line);
+    if (line.startsWith("info") && sm && line.indexOf(" pv ") > 0 && !/(lower|upper)bound/.test(line)) {
+      let v = sm[1] === "mate" ? (+sm[2] > 0 ? 10000 : -10000) : +sm[2];
+      if (evalJob.turn === "b") v = -v;
+      evalJob.score = v;
+    }
+    if (line.startsWith("bestmove")) {
+      const job = evalJob;
+      evalJob = null;
+      job.resolve({ score: job.score, reply: line.split(/\s+/)[1], after: job.after });
+    }
+  }
+
+  async function practiceMove(m) {
+    const p = practice.puzzle;
+    if (!p || practice.checking || view.fen() !== p.fen) return;
+    const res = game.move(m);
+    if (!res) { renderBoard(); return; }
+    viewPly = null; rebuildView(); renderAll();
+    const uci = res.from + res.to + (res.promotion || "");
+    if (uci === p.best) { practiceSolved("best"); return; }
+    practice.checking = true; practice.note = ""; renderPractice();
+    const r = await evalAfterMove(p.fen, uci);
+    practice.checking = false;
+    if (!practice.active || practice.puzzle !== p) return;
+    const sign = p.color === "w" ? 1 : -1;
+    const loss = r ? (winChance(p.beforeScore) - winChance(r.score)) * sign : 1;
+    if (r && loss < 0.07) { practiceSolved("alt"); return; }
+    practice.attempts++;
+    let why = "";
+    if (r && r.reply && r.reply !== "(none)") {
+      const d = describeMove(r.after, r.reply);
+      why = " Vastustaja vastaisi " + d.san + ": " + d.text.charAt(0).toLowerCase() + d.text.slice(1) + ".";
+    }
+    practice.note = "Ei aivan." + why + " Yritä uudelleen.";
+    practice.noteCls = "miss";
+    renderPractice();
+    setTimeout(() => {
+      if (practice.active && practice.puzzle === p && !practice.resolved && game.fen() !== p.fen) { game.undo(); rebuildView(); renderAll(); }
+    }, 900);
+  }
+
+  function recordResult(clean) {
+    const p = practice.puzzle;
+    p.box = clean ? Math.min(BOX_MS.length - 1, (p.box || 0) + 1) : 0;
+    p.due = Date.now() + BOX_MS[p.box];
+    p.attempts = (p.attempts || 0) + practice.attempts + 1;
+    if (clean) { p.solved = (p.solved || 0) + 1; practice.correct++; }
+    practice.done++;
+    LIB.put("puzzles", p).catch(() => {});
+  }
+
+  function practiceSolved(how) {
+    const p = practice.puzzle;
+    practice.resolved = true;
+    recordResult(practice.attempts === 0 && !practice.hinted);
+    const best = describeMove(p.fen, p.best);
+    const low = (t) => t.charAt(0).toLowerCase() + t.slice(1);
+    practice.note = how === "best"
+      ? "Oikein! " + best.san + ": " + low(best.text) + "."
+      : "Hyvä siirto, tämäkin toimii. Moottorin paras oli " + best.san + ": " + low(best.text) + ".";
+    practice.noteCls = "win";
+    renderAll(); analyze();
+  }
+
+  function practiceReveal() {
+    const p = practice.puzzle;
+    if (game.fen() !== p.fen) { game.load(p.fen); }
+    practice.revealed = true; practice.resolved = true;
+    recordResult(false);
+    const best = describeMove(p.fen, p.best);
+    practice.note = "Ratkaisu: " + best.san + " – " + best.text.charAt(0).toLowerCase() + best.text.slice(1) + ". Tehtävä tulee pian uudelleen.";
+    practice.noteCls = "";
+    viewPly = null; rebuildView(); renderAll(); analyze();
+  }
+
+  function practiceNext() {
+    practice.idx++;
+    if (practice.idx >= practice.queue.length) {
+      practice.finished = true; practice.puzzle = null;
+      renderPractice(); refreshLibraryUI();
+      return;
+    }
+    loadPuzzle();
+  }
+
+  function renderPractice() {
+    const sec = $("practiceSec");
+    sec.hidden = !practice.active;
+    if (!practice.active) return;
+    const head = $("prHead"), st = $("prState"), note = $("prNote"), actions = $("prActions");
+    actions.replaceChildren();
+    const btn = (text, cls, fn) => { const b = el("button", "btn" + (cls ? " " + cls : ""), text); b.type = "button"; b.addEventListener("click", fn); actions.appendChild(b); return b; };
+    if (practice.finished) {
+      head.textContent = "Harjoitus valmis";
+      st.className = "pstate";
+      st.textContent = "Ratkaisit " + practice.correct + "/" + practice.done + " tehtävää ensimmäisellä yrityksellä ilman vihjettä.";
+      note.textContent = practice.done > practice.correct ? "Väärin menneet tulevat pian uudelleen, oikein ratkaistut myöhemmin kertaukseen." : "Hienoa! Tehtävät palaavat kertaukseen myöhemmin.";
+      note.className = "prnote";
+      btn("Lopeta harjoitus", "primary", exitPractice);
+      return;
+    }
+    const p = practice.puzzle;
+    head.replaceChildren(el("span", null, "Tehtävä " + (practice.idx + 1) + "/" + practice.queue.length), el("span", "sep", "·"),
+      el("span", null, "vs " + p.opp + (p.date ? ", " + fmtDate(p.date) : "")));
+    st.className = "pstate";
+    if (practice.checking) st.replaceChildren(el("span", "spin"), "Tarkistetaan siirtoa…");
+    else if (practice.resolved) st.textContent = p.label + ": pelasit " + p.played + (p.kind === "blunder" ? "??" : "?");
+    else st.textContent = colorName(p.color) + " siirtää. Pelasit tässä " + p.played + (p.kind === "blunder" ? "??" : "?") + ". Löydä parempi siirto.";
+    note.textContent = practice.note;
+    note.className = "prnote" + (practice.noteCls ? " " + practice.noteCls : "");
+    if (practice.resolved) {
+      btn(practice.idx + 1 < practice.queue.length ? "Seuraava tehtävä" : "Näytä tulos", "primary", practiceNext);
+      btn("Lopeta", "quiet", exitPractice);
+    } else {
+      if (!practice.hinted) btn("Vihje", "", () => { practice.hinted = true; practice.hintSq = p.best.slice(0, 2); practice.note = "Siirrä korostettua nappulaa."; practice.noteCls = ""; renderAll(); });
+      else btn("Näytä ratkaisu", "", practiceReveal);
+      btn("Ohita", "quiet", practiceNext);
+      btn("Lopeta", "quiet", exitPractice);
+    }
+  }
+
   // ---------- Välilehdet ----------
   const TAB_KEY = "shakkivalmentaja.tab";
   const wideQuery = window.matchMedia("(min-width: 761px)");
@@ -2908,7 +3397,7 @@ label.btn { cursor: pointer; }
   try { activeTab = localStorage.getItem(TAB_KEY) || "now"; } catch (e) { /* ignore */ }
 
   function setTab(t, remember = true) {
-    if (!["now", "moves", "ana", "more"].includes(t)) t = "now";
+    if (!["now", "moves", "ana", "games", "more"].includes(t)) t = "now";
     if (wideQuery.matches && t === "moves") t = "now"; // leveällä siirrot näkyvät Suositus-välilehdellä
     activeTab = t;
     if (remember) { try { localStorage.setItem(TAB_KEY, t); } catch (e) { /* ignore */ } }
@@ -2920,6 +3409,7 @@ label.btn { cursor: pointer; }
     $("tabBody").scrollTop = 0;
     fitPanel();
     if (t === "ana") { anaSig = ""; renderAnalysis(); }
+    if (t === "games") refreshLibraryUI();
     if (t === "moves" || (t === "now" && wideQuery.matches)) renderMoves();
   }
   document.querySelector(".tabs").addEventListener("click", (e) => {
@@ -2963,6 +3453,7 @@ label.btn { cursor: pointer; }
   syncFetchUI();
   syncEngineTexts();
   setTab(activeTab, false);
+  refreshLibraryUI();
   rebuildView();
   renderAll();
   fitPanel(); // laudan piirron jälkeen tiedetään, mistä välilehtialue alkaa
