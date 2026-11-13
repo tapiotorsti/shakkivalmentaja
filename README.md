@@ -1,5 +1,10 @@
 # Shakkivalmentaja – a chess coach in the browser
 
+[![Tests](https://github.com/tapiotorsti/shakkivalmentaja/actions/workflows/test.yml/badge.svg)](https://github.com/tapiotorsti/shakkivalmentaja/actions/workflows/test.yml)
+[![License: GPL-3.0](https://img.shields.io/github/license/tapiotorsti/shakkivalmentaja?color=1f4e79)](LICENSE)
+[![Live app](https://img.shields.io/badge/live-shakkivalmentaja.web.app-e39a2d)](https://shakkivalmentaja.web.app)
+[![Dependencies: 0](https://img.shields.io/badge/dependencies-0-15967f)](package.json)
+
 *[Suomeksi: README.fi.md](README.fi.md)*
 
 **Live app: [shakkivalmentaja.web.app](https://shakkivalmentaja.web.app)** (Finnish UI, installable as a PWA, works offline)
@@ -51,7 +56,7 @@ To try the app, serve `public/` with any static file server after building, for 
 | `build.js` | Builds `dist/shakkivalmentaja.html` (standalone) and `public/` (hosted) |
 | `public/` | Static assets: Stockfish, chess.js, icons, manifest |
 | `tests/` | Headless-Chrome browser tests |
-| `tools/make_icons.py` | Generates the app icons (requires Pillow) |
+| `tools/` | Icon generator (`make_icons.py`, requires Pillow) and the GitHub social preview (`social-preview.html`, rendered with `make_social_preview.sh`) |
 | `AGENTS.md`, `.claude/skills/` | Instructions and workflows for AI coding agents (`CLAUDE.md` imports `AGENTS.md`) |
 
 ## License

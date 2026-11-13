@@ -1,5 +1,10 @@
 # Shakkivalmentaja
 
+[![Tests](https://github.com/tapiotorsti/shakkivalmentaja/actions/workflows/test.yml/badge.svg)](https://github.com/tapiotorsti/shakkivalmentaja/actions/workflows/test.yml)
+[![License: GPL-3.0](https://img.shields.io/github/license/tapiotorsti/shakkivalmentaja?color=1f4e79)](LICENSE)
+[![Live app](https://img.shields.io/badge/live-shakkivalmentaja.web.app-e39a2d)](https://shakkivalmentaja.web.app)
+[![Dependencies: 0](https://img.shields.io/badge/dependencies-0-15967f)](package.json)
+
 *[In English: README.md](README.md)*
 
 **Sovellus: [shakkivalmentaja.web.app](https://shakkivalmentaja.web.app)**

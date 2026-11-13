@@ -1,0 +1,44 @@
+<!doctype html>
+<!-- GitHubin jakokuva (Settings → Social preview). Luo uudelleen: tools/make_social_preview.sh -->
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  html, body { margin: 0; width: 1280px; height: 640px; overflow: hidden; }
+  body {
+    background: #eef2f5; color: #14202b; font-family: "Archivo", system-ui, sans-serif;
+    display: grid; grid-template-columns: 1fr 500px; gap: 56px; padding: 64px 64px 56px 72px; box-sizing: border-box;
+    position: relative;
+  }
+  body::before { /* hillitty ruutukuvio vasempaan reunaan */
+    content: ""; position: absolute; inset: 0 auto 0 0; width: 14px;
+    background: repeating-linear-gradient(#1f4e79 0 40px, #e39a2d 40px 80px);
+  }
+  .text { display: flex; flex-direction: column; min-width: 0; }
+  h1 { font-size: 64px; font-weight: 800; letter-spacing: -0.02em; margin: 0; line-height: 1; }
+  h1 span { color: #1f4e79; }
+  .tag { font-size: 32px; font-weight: 500; color: #3c4c5a; margin: 18px 0 34px; line-height: 1.2; text-wrap: balance; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+  li { font-size: 23px; display: flex; align-items: center; gap: 14px; }
+  li i { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+  .foot { margin-top: auto; font-family: "IBM Plex Mono", monospace; font-size: 20px; color: #5a6b7a; display: flex; flex-direction: column; gap: 6px; }
+  .foot b { color: #1f4e79; font-weight: 500; }
+  .shot {
+    align-self: center; width: 500px; height: 500px; border-radius: 10px;
+    background: url(../docs/screenshots/desktop.png) -145px -85px / 1147px 771px no-repeat;
+    box-shadow: 0 24px 48px rgba(20, 32, 43, .22), 0 0 0 1px rgba(20, 32, 43, .08);
+  }
+</style></head>
+<body>
+  <div class="text">
+    <h1>Shakki<span>valmentaja</span></h1>
+    <p class="tag">A chess coach that runs entirely in your browser</p>
+    <ul>
+      <li><i style="background:#e39a2d"></i>Stockfish 19 shows the best moves as arrows</li>
+      <li><i style="background:#15967f"></i>Game review with accuracy and turning points</li>
+      <li><i style="background:#8b5cf6"></i>Puzzles built from your own mistakes</li>
+      <li><i style="background:#1f4e79"></i>No backend · no dependencies · works offline</li>
+    </ul>
+    <div class="foot"><b>shakkivalmentaja.web.app</b><span>Open source · GPL-3.0</span></div>
+  </div>
+  <div class="shot" role="img" aria-label="App screenshot"></div>
+</body></html>
