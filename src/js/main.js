@@ -16,6 +16,7 @@ function renderAll() {
 // ---------- Käynnistys ----------
 keepAwake();
 restore();
+if (state.gameId) mergeLibraryEvals(state.gameId); // aiemmin analysoitu peli näkyy heti analysoituna
 syncSettingsUI();
 syncFetchUI();
 syncEngineTexts();

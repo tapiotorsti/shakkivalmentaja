@@ -74,6 +74,7 @@ function resultOfGame() {
 
 let libTimer = null, libSig = "";
 let libDeletedPgn = null; // laudalla oleva poistettu peli tallennetaan uudelleen vasta, kun siihen tulee siirtoja
+let libLoadedId = null; // peli, jonka kirjastoon tallennetut arviot on jo yhdistetty muistiin
 function scheduleLibrarySave() {
   if (libTimer) return; // korkeintaan kerran 1,5 sekunnissa
   libTimer = setTimeout(() => { libTimer = null; librarySave().catch(() => {}); }, 1500);
@@ -84,6 +85,14 @@ async function librarySave() {
   const moves = mainMoves();
   if (moves.length < 4) return;
   if (!state.gameId) state.gameId = gameKey();
+  // Sivun uudelleenlatauksen jälkeen muistissa ei ole arvioita. Tallennetut yhdistetään ensin,
+  // ettei tallennus korvaa valmista analyysia vajaalla.
+  if (libLoadedId !== state.gameId) {
+    const id = state.gameId;
+    await mergeLibraryEvals(id);
+    libLoadedId = id;
+    if (practice.active || tutorial.active || state.gameId !== id) return;
+  }
   const pos = positionsOf(moves);
   const ev = [];
   pos.forEach((p) => { const e = evals.get(p.fen); if (e && e.depth >= MIN_REVIEW_DEPTH && e.depth < 99) ev.push([p.fen, e.type, e.v, e.depth, e.best]); });
