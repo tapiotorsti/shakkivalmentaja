@@ -4,6 +4,7 @@
 // Käyttö: node build.js   (ajetaan automaattisesti ennen `firebase deploy` -komentoa ja testejä)
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const root = __dirname;
 const srcDir = path.join(root, "src");
@@ -128,7 +129,7 @@ body = replaceOnce(
   '<script>window.STOCKFISH_LOCAL = "stockfish-19-lite-single.js"; window.ENGINE_INFO = { name: "Stockfish 19", cpScale: 1 }; window.APP_HOSTED = true;</script>\n<script src="chess.min.js"></script>'
 );
 
-const html = `<!doctype html>
+let html = `<!doctype html>
 <html lang="fi">
 <head>
 ${head.trim()}
@@ -140,6 +141,25 @@ ${INSTALL_SCRIPT}
 </body>
 </html>
 `;
+
+// Sisältöturvakäytäntö (CSP): vain tämän sivun omat skriptit (tiivisteillä), omat tiedostot,
+// Google-fontit sekä Lichessin ja Chess.comin rajapinnat. frame-ancestors ym. otsakkeet ovat firebase.json:ssa.
+const scriptHashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+  .map((m) => "'sha256-" + crypto.createHash("sha256").update(m[1], "utf8").digest("base64") + "'");
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval' " + scriptHashes.join(" "),
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src https://fonts.gstatic.com",
+  "img-src 'self' data:",
+  "connect-src 'self' https://lichess.org https://api.chess.com",
+  "worker-src 'self'",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'none'",
+  "form-action 'self'",
+].join("; ");
+html = replaceOnce(html, '<meta charset="utf-8">\n', `<meta charset="utf-8">\n<meta http-equiv="Content-Security-Policy" content="${CSP}">\n`);
 fs.writeFileSync(path.join(pub, "index.html"), html);
 
 // Service worker: uusi versio joka buildilla, jotta puhelimet saavat päivityksen.

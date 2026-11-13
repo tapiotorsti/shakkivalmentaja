@@ -34,6 +34,7 @@ const TESTS = [
   { name: "peli", file: "play.mjs", args: () => [join(OUT, "peli.png")] },
   { name: "kirjasto ja harjoitus", file: "library.mjs", args: () => [join(OUT, "kirjasto.png")] },
   { name: "opetus", file: "tutorial.mjs", args: () => [join(OUT, "opetus.png")] },
+  { name: "tietoturva", file: "security.mjs" },
   { name: "aloittelija ja haku", file: "features.mjs", network: true, args: () => [join(OUT, "aloittelija.png")] },
 ];
 

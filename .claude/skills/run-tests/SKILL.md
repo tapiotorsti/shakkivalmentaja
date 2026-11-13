@@ -19,7 +19,7 @@ npm test                                  # all suites, including "aloittelija j
 node tests/run.mjs --only "kirjasto ja harjoitus"   # one or more suites, comma-separated
 ```
 
-The runner (`tests/run.mjs`) builds the app first, serves `public/` on port 8765, starts headless Chrome with a fresh profile on port 9333, and runs each suite as a separate Node process. Suite names: `navigointi`, `animaatiot`, `välilehdet`, `asettelun vakaus`, `analyysi`, `peli`, `kirjasto ja harjoitus`, `opetus`, `aloittelija ja haku` (network). Screenshots go to `tests/output/`.
+The runner (`tests/run.mjs`) builds the app first, serves `public/` on port 8765, starts headless Chrome with a fresh profile on port 9333, and runs each suite as a separate Node process. Suite names: `navigointi`, `animaatiot`, `välilehdet`, `asettelun vakaus`, `analyysi`, `peli`, `kirjasto ja harjoitus`, `opetus`, `tietoturva` (CSP), `aloittelija ja haku` (network). Screenshots go to `tests/output/`.
 
 ## Read the result
 
