@@ -37,20 +37,19 @@ function dangersFor(fen, owner) {
     atk.moves({ verbose: true }).forEach((m) => {
       if (!m.captured || m.color !== opp) return;
       if (!byTarget.has(m.to)) byTarget.set(m.to, []);
-      byTarget.get(m.to).push(m.piece);
+      byTarget.get(m.to).push(m);
     });
-    byTarget.forEach((attackers, sq) => {
+    byTarget.forEach((captures, sq) => {
       const piece = atk.get(sq);
       if (!piece || piece.color !== owner || piece.type === "k") return;
-      // suojaako jokin? asetetaan ruutuun vastustajan nappula ja katsotaan, voiko omistaja lyödä sen
-      const def = withTurn(fen, owner);
-      if (!def) return;
-      def.remove(sq);
-      def.put({ type: "n", color: opp }, sq);
-      const defended = def.moves({ verbose: true }).some((m) => m.to === sq && m.captured);
-      const cheapest = attackers.reduce((a, b) => (PIECE_VALUE[a] <= PIECE_VALUE[b] ? a : b));
-      if (!defended || PIECE_VALUE[cheapest] < PIECE_VALUE[piece.type]) {
-        out.set(sq, { type: piece.type, hanging: !defended, by: cheapest });
+      const cheapest = captures.reduce((a, b) => (PIECE_VALUE[a.piece] <= PIECE_VALUE[b.piece] ? a : b));
+      // suojaako jokin? halvin hyökkääjä lyö, ja katsotaan, voiko omistaja lyödä takaisin
+      // (näin myös kuninkaan suoja lasketaan oikein: lyöjä ei enää uhkaa ruutua sen takaa)
+      const after = new Chess(atk.fen());
+      after.move({ from: cheapest.from, to: sq, promotion: cheapest.promotion });
+      const defended = after.moves({ verbose: true }).some((m) => m.to === sq && m.captured);
+      if (!defended || PIECE_VALUE[cheapest.piece] < PIECE_VALUE[piece.type]) {
+        out.set(sq, { type: piece.type, hanging: !defended, by: cheapest.piece });
       }
     });
   }
