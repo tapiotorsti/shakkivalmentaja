@@ -63,6 +63,7 @@ tests/unit/        Node unit tests (node:test) that load the real src/js files i
 - **Help stays in sync.** When a feature changes behaviour, update `src/help.html` and, if relevant, `README.md` / `README.fi.md`.
 - Plain DOM code: `$("id")` for `getElementById`, `el(tag, cls, text)` for creating elements. No frameworks, no new dependencies, no CDN except cdnjs (already used).
 - Wrap every `localStorage` and IndexedDB access in try/catch. The app must keep working when storage is unavailable.
+- **Accessibility (WCAG 2.2 AA):** update status and feedback lines with `setLive(node, …)` in elements that have `role="status"`, so that screen readers hear the change once. Keep board square labels (`renderBoard`) in sync with what the board shows (selection, legal moves, check, last move). Keyboard shortcuts with a single character key must only work when focus is in the relevant area (see the F key). The `saavutettavuus` browser suite checks these.
 - Mobile first: the layout is tested at 412 px wide, and the layout-stability test fails if content jumps.
 - Commit messages: a Finnish summary line, then a short body explaining why. Do not add AI attribution trailers (`Co-Authored-By`, "Generated with …").
 

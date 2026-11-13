@@ -132,7 +132,8 @@ document.addEventListener("keydown", (e) => {
   if (e.altKey || e.ctrlKey || e.metaKey) return;
   const map = { ArrowLeft: -1, ArrowRight: 1 };
   if (e.key in map) goTo(curPly() + map[e.key]);
-  else if (e.key === "f" || e.key === "F") { state.flipped = !state.flipped; save(); renderBoard(); drawArrows(); }
+  // yhden merkin oikotie vain laudalla, ettei se laukea esim. puheohjauksen sanelusta (WCAG 2.1.4)
+  else if ((e.key === "f" || e.key === "F") && t && t.closest && t.closest(".board-col")) { state.flipped = !state.flipped; save(); renderBoard(); drawArrows(); }
   else if (e.key === "Home") goTo(0);
   else if (e.key === "End") goTo(activeMoves().length);
   else return;

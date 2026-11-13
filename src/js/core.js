@@ -55,6 +55,13 @@ function restore() {
 const fiSan = (san) => san.replace(/[QRBN]/g, (c) => FI[c]);
 const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
+// Tilarivi ruudunlukijalle (role="status"): sisältö vaihdetaan vain, kun teksti muuttuu,
+// jotta näkymän uudelleenpiirto ei toista samaa ilmoitusta.
+function setLive(node, ...content) {
+  const next = content.map((c) => (typeof c === "string" ? c : c.textContent)).join("");
+  if (node.textContent !== next) node.replaceChildren(...content);
+}
+
 function squareXY(sq) {
   const f = FILES.indexOf(sq[0]), r = +sq[1] - 1;
   return state.flipped ? { x: 7 - f + 0.5, y: r + 0.5 } : { x: f + 0.5, y: 7 - r + 0.5 };

@@ -159,7 +159,6 @@ function renderPlay() {
   );
   const st = $("playState");
   st.className = "pstate";
-  st.replaceChildren();
   const actions = $("playActions");
   actions.replaceChildren();
   const btn = (text, cls, fn) => { const b = el("button", "btn" + (cls ? " " + cls : ""), text); b.type = "button"; b.addEventListener("click", fn); actions.appendChild(b); return b; };
@@ -168,7 +167,7 @@ function renderPlay() {
   const info = resultInfo();
   if (info) {
     st.classList.add(info.cls);
-    st.textContent = info.text;
+    setLive(st, info.text);
     note.textContent = "Analyysi ja siirtojen arviot ovat nyt näkyvissä." + (play.hints ? " Vihjeitä käytit " + play.hints + "." : "");
     note.hidden = false;
     btn("Uusi peli", "primary", startPlay);
@@ -177,9 +176,9 @@ function renderPlay() {
   }
   note.hidden = true;
 
-  if (viewPly !== null || variation) st.textContent = "Katselet aiempaa asemaa. Palaa viimeisimpään siirtoon jatkaaksesi.";
-  else if (play.thinking) { st.append(el("span", "spin"), "Kone miettii…"); }
-  else st.textContent = "Sinun vuorosi.";
+  if (viewPly !== null || variation) setLive(st, "Katselet aiempaa asemaa. Palaa viimeisimpään siirtoon jatkaaksesi.");
+  else if (play.thinking) setLive(st, el("span", "spin"), "Kone miettii…");
+  else setLive(st, "Sinun vuorosi.");
 
   btn("Vihje", "", () => {
     if (play.thinking || view.turn() !== play.human || viewPly !== null) { playMsg("Vihjeen saa omalla vuorollasi viimeisimmässä asemassa."); return; }

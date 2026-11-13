@@ -206,9 +206,9 @@ function renderTutorial() {
   const l = LESSONS[tutorial.li], step = curStep();
   $("tuHead").replaceChildren(el("span", null, "Opi pelaamaan"), el("span", "sep", "·"), el("span", null, l.name + " " + (tutorial.si + 1) + "/" + l.steps.length));
   $("tuText").textContent = step.text;
-  $("tuTask").textContent = step.task;
+  setLive($("tuTask"), step.task);
   const note = $("tuNote");
-  note.textContent = tutorial.note;
+  setLive(note, tutorial.note);
   note.className = "prnote" + (tutorial.noteCls ? " " + tutorial.noteCls : "");
   const actions = $("tuActions");
   actions.replaceChildren();

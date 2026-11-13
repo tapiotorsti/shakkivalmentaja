@@ -163,8 +163,8 @@ function renderPractice() {
   if (practice.finished) {
     head.textContent = "Harjoitus valmis";
     st.className = "pstate";
-    st.textContent = "Ratkaisit " + practice.correct + "/" + practice.done + " tehtävää ensimmäisellä yrityksellä ilman vihjettä.";
-    note.textContent = practice.done > practice.correct ? "Väärin menneet tulevat pian uudelleen, oikein ratkaistut myöhemmin kertaukseen." : "Hienoa! Tehtävät palaavat kertaukseen myöhemmin.";
+    setLive(st, "Ratkaisit " + practice.correct + "/" + practice.done + " tehtävää ensimmäisellä yrityksellä ilman vihjettä.");
+    setLive(note, practice.done > practice.correct ? "Väärin menneet tulevat pian uudelleen, oikein ratkaistut myöhemmin kertaukseen." : "Hienoa! Tehtävät palaavat kertaukseen myöhemmin.");
     note.className = "prnote";
     btn("Lopeta harjoitus", "primary", exitPractice);
     return;
@@ -173,10 +173,10 @@ function renderPractice() {
   head.replaceChildren(el("span", null, "Tehtävä " + (practice.idx + 1) + "/" + practice.queue.length), el("span", "sep", "·"),
     el("span", null, "vs " + p.opp + (p.date ? ", " + fmtDate(p.date) : "")));
   st.className = "pstate";
-  if (practice.checking) st.replaceChildren(el("span", "spin"), "Tarkistetaan siirtoa…");
-  else if (practice.resolved) st.textContent = p.label + ": pelasit " + p.played + (p.kind === "blunder" ? "??" : "?");
-  else st.textContent = colorName(p.color) + " siirtää. Pelasit tässä " + p.played + (p.kind === "blunder" ? "??" : "?") + ". Löydä parempi siirto.";
-  note.textContent = practice.note;
+  if (practice.checking) setLive(st, el("span", "spin"), "Tarkistetaan siirtoa…");
+  else if (practice.resolved) setLive(st, p.label + ": pelasit " + p.played + (p.kind === "blunder" ? "??" : "?"));
+  else setLive(st, colorName(p.color) + " siirtää. Pelasit tässä " + p.played + (p.kind === "blunder" ? "??" : "?") + ". Löydä parempi siirto.");
+  setLive(note, practice.note);
   note.className = "prnote" + (practice.noteCls ? " " + practice.noteCls : "");
   if (practice.resolved) {
     btn(practice.idx + 1 < practice.queue.length ? "Seuraava tehtävä" : "Näytä tulos", "primary", practiceNext);

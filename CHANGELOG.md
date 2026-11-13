@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Accessibility
+
+- Screen readers now hear feedback and status messages: puzzle and lesson feedback, the state of a game against the computer, and fetch, import and FEN messages (WCAG 4.1.3).
+- Board squares tell screen readers the selected piece, legal moves and captures, check, the last move, the lesson goal and the puzzle hint. The board is a labelled group instead of an incomplete grid (WCAG 1.3.1, 4.1.2).
+- Keyboard focus stays on the square after selecting a piece or making a move, so a game can be played with the keyboard.
+- The F shortcut flips the board only when focus is on the board, so it cannot fire by accident, for example from voice dictation (WCAG 2.1.4).
+
 ## [1.0.0] – 2026-11-13
 
 First public release. Live at https://shakkivalmentaja.web.app.

@@ -23,7 +23,7 @@
     <div class="board-row">
       <div class="evalbar" id="evalbar" aria-hidden="true"><div class="fill" id="evalfill"></div></div>
       <div class="board-wrap" id="boardWrap">
-        <div class="board" id="board" role="grid" aria-label="Shakkilauta"></div>
+        <div class="board" id="board" role="group" aria-label="Shakkilauta"></div>
         <svg class="arrows" id="arrows" viewBox="0 0 8 8" aria-hidden="true"></svg>
         <div class="promo" id="promo" hidden><div class="box" id="promoBox"></div></div>
       </div>
@@ -69,19 +69,19 @@
     <section class="section live-play" id="playSec" data-tab="now" hidden>
       <div class="play" id="playLive">
         <div class="vs" id="playVs"></div>
-        <p class="pstate" id="playState"></p>
+        <p class="pstate" id="playState" role="status"></p>
         <p class="hint" id="playNote" hidden></p>
         <div class="play-actions" id="playActions"></div>
       </div>
-      <p class="msg" id="playMsg"></p>
+      <p class="msg" id="playMsg" role="status"></p>
     </section>
 
     <section class="section live-play" id="tutorialSec" data-tab="now" hidden>
       <div class="play">
         <div class="vs" id="tuHead"></div>
         <p class="tutext" id="tuText"></p>
-        <p class="pstate" id="tuTask"></p>
-        <p class="prnote" id="tuNote"></p>
+        <p class="pstate" id="tuTask" role="status"></p>
+        <p class="prnote" id="tuNote" role="status"></p>
         <div class="play-actions" id="tuActions"></div>
       </div>
     </section>
@@ -89,8 +89,8 @@
     <section class="section live-play" id="practiceSec" data-tab="now" hidden>
       <div class="play">
         <div class="vs" id="prHead"></div>
-        <p class="pstate" id="prState"></p>
-        <p class="prnote" id="prNote"></p>
+        <p class="pstate" id="prState" role="status"></p>
+        <p class="prnote" id="prNote" role="status"></p>
         <div class="play-actions" id="prActions"></div>
       </div>
     </section>
@@ -203,7 +203,7 @@
               <input id="userInput" type="text" placeholder="Käyttäjänimi" autocomplete="username" autocapitalize="none" spellcheck="false" aria-label="Käyttäjänimi">
               <button class="btn primary" id="fetchBtn" type="submit">Hae pelit</button>
             </form>
-            <p class="msg" id="fetchMsg"></p>
+            <p class="msg" id="fetchMsg" role="status"></p>
             <div class="rows glist" id="gameList" hidden></div>
           </div>
           <p class="hint" id="fetchOff" hidden>Omien pelien haku Lichessistä ja Chess.comista toimii sovellusversiossa osoitteessa shakkivalmentaja.web.app.</p>
@@ -215,14 +215,14 @@
             <input class="vh" type="file" id="pgnFile" accept=".pgn,.txt,application/x-chess-pgn,text/plain">
             <button class="btn quiet" id="copyPgn" type="button">Kopioi PGN</button>
           </div>
-          <p class="msg" id="pgnMsg"></p>
+          <p class="msg" id="pgnMsg" role="status"></p>
           <label class="lbl adv" for="fenInput">Asema (FEN)</label>
           <div class="fen adv">
             <input id="fenInput" type="text" spellcheck="false" autocomplete="off">
             <button class="btn" id="loadFen" type="button">Lataa</button>
             <button class="btn quiet" id="copyFen" type="button">Kopioi</button>
           </div>
-          <p class="msg adv" id="fenMsg"></p>
+          <p class="msg adv" id="fenMsg" role="status"></p>
         </div>
       </details>
 
