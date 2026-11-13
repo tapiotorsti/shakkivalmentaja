@@ -1,6 +1,7 @@
 # Shakkivalmentaja – a chess coach in the browser
 
 [![Tests](https://github.com/tapiotorsti/shakkivalmentaja/actions/workflows/test.yml/badge.svg)](https://github.com/tapiotorsti/shakkivalmentaja/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/tapiotorsti/shakkivalmentaja?color=1f4e79)](CHANGELOG.md)
 [![License: GPL-3.0](https://img.shields.io/github/license/tapiotorsti/shakkivalmentaja?color=1f4e79)](LICENSE)
 [![Live app](https://img.shields.io/badge/live-shakkivalmentaja.web.app-e39a2d)](https://shakkivalmentaja.web.app)
 [![Runtime dependencies: 0](https://img.shields.io/badge/runtime%20dependencies-0-15967f)](package.json)
@@ -63,6 +64,10 @@ To try the app, serve `public/` with any static file server after building, for 
 | `tests/` | Headless-Chrome browser tests |
 | `tools/` | Icon generator (`make_icons.py`, requires Pillow) and the GitHub social preview (`social-preview.html`, rendered with `make_social_preview.sh`) |
 | `AGENTS.md`, `.claude/skills/` | Instructions and workflows for AI coding agents (`CLAUDE.md` imports `AGENTS.md`) |
+
+## Changes
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

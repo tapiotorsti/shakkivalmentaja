@@ -1,6 +1,7 @@
 # Shakkivalmentaja
 
 [![Tests](https://github.com/tapiotorsti/shakkivalmentaja/actions/workflows/test.yml/badge.svg)](https://github.com/tapiotorsti/shakkivalmentaja/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/tapiotorsti/shakkivalmentaja?color=1f4e79)](CHANGELOG.md)
 [![License: GPL-3.0](https://img.shields.io/github/license/tapiotorsti/shakkivalmentaja?color=1f4e79)](LICENSE)
 [![Live app](https://img.shields.io/badge/live-shakkivalmentaja.web.app-e39a2d)](https://shakkivalmentaja.web.app)
 [![Runtime dependencies: 0](https://img.shields.io/badge/runtime%20dependencies-0-15967f)](package.json)
@@ -55,6 +56,10 @@ Aja `npm test` ennen julkaisua.
 - Chess.comin kuluvan kuukauden arkisto voi palauttaa virheen, vaikka käyttäjä on olemassa. Haku ohittaa virheelliset kuukaudet ja hakee aiemmista.
 - Lichessin rajapinta palauttaa 404, jos selaimen tunniste on `HeadlessChrome` tai curlin oletus. Testit vaihtavat tunnisteen tavalliseksi Chromeksi. Oikeilla käyttäjillä haku toimii normaalisti.
 - Moottorin vaihtuessa tarkista `ENGINE_INFO` (`build.js`): Stockfish 10:n arvot skaalataan kertoimella 0,7 (`cpScale`), uusilla versioilla kerroin on 1.
+
+## Muutokset
+
+Katso [CHANGELOG.md](CHANGELOG.md) (englanniksi).
 
 ## Lisenssi
 

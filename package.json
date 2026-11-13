@@ -1,5 +1,6 @@
 {
   "name": "shakkivalmentaja",
+  "version": "1.0.0",
   "private": true,
   "description": "Chess coach in the browser: Stockfish suggestions as arrows, game analysis, Lichess/Chess.com import and practice puzzles from your own mistakes.",
   "license": "GPL-3.0-only",
