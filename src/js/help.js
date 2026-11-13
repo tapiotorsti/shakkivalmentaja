@@ -3,11 +3,13 @@ let helpReturn = null;
 function openHelp() {
   helpReturn = document.activeElement;
   $("help").hidden = false;
+  document.querySelector(".app").inert = true; // kohdistus ei pääse taustalle tummennuksen alle
   document.body.style.overflow = "hidden";
   $("helpClose").focus();
 }
 function closeHelp() {
   $("help").hidden = true;
+  document.querySelector(".app").inert = false;
   document.body.style.overflow = "";
   if (helpReturn && helpReturn.focus) helpReturn.focus();
 }

@@ -73,6 +73,33 @@ await focusSq("e1");
 await press("f", "KeyF", 70, "f");
 check(await corner() !== before, "F kääntää laudan, kun kohdistus on laudalla");
 
+// ohjeikkuna: tausta ei saa kohdistusta (WCAG 2.4.3, 2.4.11)
+const outsideApp = () => run(() => !document.querySelector(".app").contains(document.activeElement));
+await run(() => { document.getElementById("helpBtn").focus(); document.getElementById("helpBtn").click(); return true; });
+await sleep(200);
+check(await run(() => document.querySelector(".app").inert === true), "ohjeen ajaksi taustasivu on inert-tilassa");
+let staysOut = true;
+for (let i = 0; i < 4; i++) { await press("Tab", "Tab", 9); if (!(await outsideApp())) staysOut = false; }
+check(staysOut, "Tab ei vie kohdistusta ohjeen taakse");
+await press("Escape", "Escape", 27);
+check(await run(() => document.getElementById("help").hidden && !document.querySelector(".app").inert && document.activeElement.id === "helpBtn"),
+  "Esc sulkee ohjeen ja kohdistus palaa Ohje-painikkeeseen");
+
+// korotusvalikko: kohdistus valikkoon, Esc peruu, valinta palauttaa kohdistuksen laudalle
+await loadFen("4k3/1P6/8/8/8/8/8/4K3 w - - 0 1");
+await sleep(300);
+const openPromo = async () => { await focusSq("b7"); await enter(); await focusSq("b8"); await enter(); await sleep(150); };
+await openPromo();
+check(await run(() => !document.getElementById("promo").hidden && document.activeElement.getAttribute("aria-label") === "Daami"), "korotusvalikko avautui ja kohdistus siirtyi Daami-vaihtoehtoon");
+check(await run(() => document.getElementById("board").inert === true), "valikon alla oleva lauta on inert-tilassa");
+await press("Escape", "Escape", 27);
+check(await run(() => document.getElementById("promo").hidden && !document.getElementById("board").inert), "Esc sulki valikon");
+check(await activeSq() === "b7" && /valkea sotilas/.test(await label("b7")), "korotus peruttiin ja kohdistus palasi sotilaaseen");
+await openPromo();
+await enter(); // Daami
+await sleep(200);
+check(/valkea daami/.test(await label("b8")) && await activeSq() === "b8", "valinta korotti daamiksi ja kohdistus on uudessa nappulassa");
+
 // tilailmoitukset
 const roles = await run(() => ["playState", "playMsg", "tuTask", "tuNote", "prState", "prNote", "fetchMsg", "pgnMsg", "fenMsg"]
   .filter((i) => document.getElementById(i).getAttribute("role") !== "status"));

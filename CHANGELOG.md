@@ -9,6 +9,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - Screen readers now hear feedback and status messages: puzzle and lesson feedback, the state of a game against the computer, and fetch, import and FEN messages (WCAG 4.1.3).
 - Board squares tell screen readers the selected piece, legal moves and captures, check, the last move, the lesson goal and the puzzle hint. The board is a labelled group instead of an incomplete grid (WCAG 1.3.1, 4.1.2).
 - Keyboard focus stays on the square after selecting a piece or making a move, so a game can be played with the keyboard.
+- The help dialog keeps keyboard focus inside it: the page behind it is inert while it is open (WCAG 2.4.3, 2.4.11). The promotion menu moves focus to its choices, Escape cancels it, and focus returns to the board afterwards.
+- Text fields, legal-move dots, the selected square, the keyboard focus ring on the board, the lesson goal and the puzzle hint now have at least 3:1 contrast in both themes (WCAG 1.4.11).
 - The F shortcut flips the board only when focus is on the board, so it cannot fire by accident, for example from voice dictation (WCAG 2.1.4).
 
 ## [1.0.0] – 2026-11-13

@@ -46,14 +46,24 @@ function askPromotion(from, to) {
     b.type = "button"; b.setAttribute("aria-label", name);
     const s = document.createElement("span"); s.className = "piece " + color; s.textContent = GLYPH[t] + "︎";
     b.appendChild(s);
-    b.addEventListener("click", () => { const m = pendingPromo; pendingPromo = null; $("promo").hidden = true; playMove({ ...m, promotion: t }); });
+    b.addEventListener("click", () => { const m = closePromo(); playMove({ ...m, promotion: t }); focusSquare(m.to); });
     box.appendChild(b);
   });
   $("promo").hidden = false;
+  boardEl.inert = true; // kohdistus pysyy valikossa eikä mene peitettyihin ruutuihin
+  box.firstChild.focus();
 }
-$("promo").addEventListener("click", (e) => {
-  if (e.target.id === "promo") { pendingPromo = null; $("promo").hidden = true; clearSel(); }
-});
+function closePromo() {
+  const m = pendingPromo;
+  pendingPromo = null;
+  $("promo").hidden = true;
+  boardEl.inert = false;
+  return m;
+}
+function cancelPromo() { const m = closePromo(); clearSel(); if (m) focusSquare(m.from); }
+const focusSquare = (sq) => { const b = boardEl.querySelector('[data-sq="' + sq + '"]'); if (b) b.focus({ preventScroll: true }); };
+$("promo").addEventListener("click", (e) => { if (e.target.id === "promo") cancelPromo(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("promo").hidden) { e.preventDefault(); cancelPromo(); } });
 
 // Siirto laudalla näkyvästä asemasta. Lopussa siirto jatkaa linjaa. Aiemmassa asemassa sama siirto
 // kuin pelissä vain etenee, ja eri siirto aloittaa sivuvariantin, joten pelin loppuosa säilyy.
