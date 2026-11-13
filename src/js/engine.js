@@ -44,7 +44,7 @@ function onEngineLine(line) {
   if (needRestart || !line.startsWith("info") || line.indexOf(" pv ") < 0) return;
   if (/ (lowerbound|upperbound)/.test(line)) return;
   const depth = +(/ depth (\d+)/.exec(line) || [])[1];
-  const k = +((/ multipv (\d+)/.exec(line) || [, 1])[1]) - 1;
+  const k = +((/ multipv (\d+)/.exec(line) || [null, 1])[1]) - 1;
   const sm = / score (cp|mate) (-?\d+)/.exec(line);
   const pv = line.split(" pv ")[1].trim().split(/\s+/);
   if (!sm || !depth) return;

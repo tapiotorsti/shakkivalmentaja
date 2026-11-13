@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  browser-tests:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -14,7 +14,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Run offline browser tests
+          cache: npm
+      - name: Install dev tools (ESLint)
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Unit and browser tests (offline)
         run: npm run test:offline
         env:
           CHROME_PATH: /usr/bin/google-chrome

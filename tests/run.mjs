@@ -155,7 +155,7 @@ try {
     const r = await runTest(t);
     results.push(r);
     console.log(r.ok ? `ok (${r.oks} tarkistusta, ${r.secs} s)` : `EPÄONNISTUI (${r.secs} s)`);
-    if (!r.ok) console.log(r.out.split(/\r?\n/).filter((l) => /^(FAIL|ERRORS|Error|    at )/.test(l) || l.includes("Error")).slice(0, 15).map((l) => "    " + l).join("\n"));
+    if (!r.ok) console.log(r.out.split(/\r?\n/).filter((l) => /^(FAIL|ERRORS|Error| {4}at )/.test(l) || l.includes("Error")).slice(0, 15).map((l) => "    " + l).join("\n"));
   }
 } finally {
   stopChrome(chrome);

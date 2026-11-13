@@ -3,7 +3,7 @@
 [![Tests](https://github.com/tapiotorsti/shakkivalmentaja/actions/workflows/test.yml/badge.svg)](https://github.com/tapiotorsti/shakkivalmentaja/actions/workflows/test.yml)
 [![License: GPL-3.0](https://img.shields.io/github/license/tapiotorsti/shakkivalmentaja?color=1f4e79)](LICENSE)
 [![Live app](https://img.shields.io/badge/live-shakkivalmentaja.web.app-e39a2d)](https://shakkivalmentaja.web.app)
-[![Dependencies: 0](https://img.shields.io/badge/dependencies-0-15967f)](package.json)
+[![Runtime dependencies: 0](https://img.shields.io/badge/runtime%20dependencies-0-15967f)](package.json)
 
 *[Suomeksi: README.fi.md](README.fi.md)*
 
@@ -39,10 +39,12 @@ Shakkivalmentaja ("chess coach") is a Finnish-language chess training app. Stock
 
 ## Running locally
 
-Requires Node 22+ and Chrome or Edge (set `CHROME_PATH` if it is not found automatically).
+Requires Node 22+ and Chrome or Edge (set `CHROME_PATH` if it is not found automatically). The app itself has no dependencies; `npm ci` installs only the development tools (ESLint).
 
 ```sh
 npm run build         # build dist/shakkivalmentaja.html and public/ (index.html, sw.js)
+npm ci                # dev tools only (ESLint)
+npm run lint          # ESLint; the src/js files are checked together, as one scope
 npm run test:unit     # unit tests only (<1 s, no browser needed)
 npm test              # unit tests, then build and run all browser tests (~2–3 min)
 npm run test:offline  # the same without the tests that call Lichess and Chess.com

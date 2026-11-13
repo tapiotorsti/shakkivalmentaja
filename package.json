@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "node build.js",
+    "lint": "node tools/lint.mjs",
     "test:unit": "node --test \"tests/unit/*.test.mjs\"",
     "test": "npm run test:unit && node tests/run.mjs",
     "test:offline": "npm run test:unit && node tests/run.mjs --offline",
@@ -17,5 +18,10 @@
   },
   "engines": {
     "node": ">=22"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^17.14.0"
   }
 }

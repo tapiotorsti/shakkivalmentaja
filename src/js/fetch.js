@@ -65,7 +65,7 @@ function renderGameList(user) {
   list.replaceChildren();
   list.hidden = !fetchedGames.length;
   const lc = user.toLowerCase();
-  fetchedGames.forEach((g, idx) => {
+  fetchedGames.forEach((g) => {
     const meWhite = g.white.toLowerCase() === lc;
     const meBlack = g.black.toLowerCase() === lc;
     const mine = meWhite ? "1-0" : meBlack ? "0-1" : null;

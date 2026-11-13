@@ -3,7 +3,7 @@ const PGN_OPTS = { sloppy: true, newline_char: "\r?\n" };
 function pgnMsg(text, err) { const m = $("pgnMsg"); m.textContent = text; m.className = "msg" + (err ? " err" : ""); }
 
 function parsePgn(text) {
-  text = String(text || "").replace(/^﻿/, "").trim();
+  text = String(text || "").replace(/^\uFEFF/, "").trim();
   if (!text) return { error: "Liitä ensin peli tekstikenttään tai valitse tiedosto." };
   const first = text.split(/\r?\n\s*\r?\n(?=\s*\[Event )/)[0]; // vain ensimmäinen peli
   const c = new Chess();

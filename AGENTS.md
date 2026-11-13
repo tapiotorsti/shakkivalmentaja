@@ -10,6 +10,8 @@ Shakkivalmentaja is a Finnish-language chess coach that runs entirely in the bro
 
 ```sh
 npm run build         # src/ → dist/shakkivalmentaja.html and public/index.html + public/sw.js
+npm ci                # dev tools only (ESLint)
+npm run lint          # ESLint (tools/lint.mjs); must pass
 npm run test:unit     # unit tests of the app logic in Node, no browser (<1 s)
 npm run test:offline  # unit tests + build + browser tests, skipping Lichess/Chess.com (~2.5 min)
 npm test              # all tests, including the network test
@@ -17,7 +19,7 @@ node tests/run.mjs --only analyysi,peli   # selected suites (names are listed in
 npm run deploy        # Firebase deploy. Only when the user asks.
 ```
 
-Requirements: Node 22+ and Chrome or Edge (`CHROME_PATH` if not found). There is nothing to `npm install`: the project has **no dependencies**, and that is deliberate.
+Requirements: Node 22+ and Chrome or Edge (`CHROME_PATH` if not found). The app has **no runtime dependencies**, and that is deliberate: never add one. `npm ci` installs only dev tools (ESLint).
 
 ## Architecture
 
@@ -66,7 +68,7 @@ tests/unit/        Node unit tests (node:test) that load the real src/js files i
 
 ## Testing
 
-Every change must pass `npm run test:offline` before it is done. Changes to game fetching must also pass `npm test`. CI (`.github/workflows/test.yml`) runs the offline suite on every push.
+Every change must pass `npm run lint` and `npm run test:offline` before it is done. `npm run lint` checks `src/js` concatenated in build order, like the built app: it finds undefined and unused names across files and reports them at the original file and line. `npx eslint` on single `src/js` files does not work, because each file uses names from the others. Changes to game fetching must also pass `npm test`. CI (`.github/workflows/test.yml`) runs lint and the offline suite on every push.
 
 **Unit tests** (`tests/unit/*.test.mjs`) cover the logic: move classification, win chances, accuracy, beginner-mode danger detection, moves in words, PGN parsing, library keys, the review schedule and the parsing of Lichess and Chess.com responses. `harness.mjs` loads every `src/js` file except `main.js` into a Node `vm` context in `JS_FILES` order, with chess.js and a minimal DOM stub. `loadApp()` then gives access to any top-level name (`app.classify`, `app.game` …). Each test gets a fresh app. When you change logic, add or update a unit test. Prefer pure functions that take their inputs as arguments (see `nextReview` in `practice.js`).
 
