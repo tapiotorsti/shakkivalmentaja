@@ -10,7 +10,7 @@ Files: `public/stockfish-19-lite-single.js`, `public/stockfish-19-lite-single.wa
 
 License: GNU General Public License v3.0 (see [LICENSE](LICENSE)). The source code for these files is available from the repositories above.
 
-The standalone single-file version (`shakkivalmentaja.html`) loads Stockfish.js 10.0.2 (GPLv3) from cdnjs at runtime. That copy is not distributed in this repository.
+The standalone single-file build (`dist/shakkivalmentaja.html`) loads Stockfish.js 10.0.2 (GPLv3) from cdnjs at runtime. That copy is not distributed in this repository.
 
 ## chess.js 0.10.3
 

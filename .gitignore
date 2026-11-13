@@ -1,9 +1,13 @@
-# build.js tuottaa nämä shakkivalmentaja.html-tiedostosta
+# build.js tuottaa nämä src/-kansiosta
+dist/
 public/index.html
 public/sw.js
 
 # Firebase CLI:n välimuisti
 .firebase/
+
+# Claude Coden paikalliset asetukset
+.claude/
 
 # Testien kuvakaappaukset
 tests/output/

@@ -1,0 +1,223 @@
+<div class="help" id="help" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="help-card">
+    <div class="help-head">
+      <h2 id="helpTitle">Mitä luvut tarkoittavat?</h2>
+      <button class="btn" id="helpClose" type="button">Sulje</button>
+    </div>
+    <div class="help-body">
+
+      <h3><span class="tag">+0.85</span> Arvio</h3>
+      <p>Arvio kertoo, kumpi on moottorin mielestä paremmassa asemassa ja kuinka paljon. Yksikkönä on <b>sotilas</b>: +1.00 tarkoittaa suunnilleen yhden ylimääräisen sotilaan etua.</p>
+      <ul>
+        <li><b>Plus (+)</b> tarkoittaa, että valkealla on etu. <b>Miinus (−)</b> tarkoittaa, että mustalla on etu.</li>
+        <li>Arvio on <b>aina valkean näkökulmasta</b>, vaikka pelaisit mustilla. Mustilla pelatessa toivot siis miinusmerkkistä lukua.</li>
+        <li>Etu voi olla muutakin kuin materiaalia: parempi kuninkaan suoja, aktiivisemmat nappulat tai vahva sotilasrakenne.</li>
+      </ul>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Arvio</th><th>Merkitys</th></tr></thead>
+          <tbody>
+            <tr><td>0.00 – ±0.30</td><td>Tasainen asema</td></tr>
+            <tr><td>±0.30 – ±0.70</td><td>Pieni etu, peli on vielä täysin auki</td></tr>
+            <tr><td>±0.70 – ±1.50</td><td>Selvä etu</td></tr>
+            <tr><td>±1.50 – ±3.00</td><td>Suuri etu, yleensä voittava hyvällä pelillä</td></tr>
+            <tr><td>yli ±3.00</td><td>Voittava asema</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Nappuloiden suuntaa-antavat arvot sotilaina: sotilas 1, ratsu ja lähetti noin 3, torni 5, daami 9. Arvot näkyvät myös Lisää-välilehdellä. Jos arvio putoaa yhden siirron jälkeen esimerkiksi +0.5:stä −2.5:een, siirto menetti noin lähetin verran.</p>
+
+      <h3><span class="tag">#3</span> Matti</h3>
+      <p><span class="mono">#3</span> tarkoittaa, että <b>valkea</b> tekee pakotetun matin 3 siirrossa. <span class="mono">#-3</span> tarkoittaa, että <b>musta</b> tekee matin 3 siirrossa. Numero on oman puolen siirtojen määrä, ei puolisiirtojen.</p>
+
+      <h3><span class="tag">+3</span> Materiaali laudan ylä- ja alapuolella</h3>
+      <p>Pelaajan nimen vieressä ovat nappulat, jotka hän on lyönyt <b>enemmän kuin vastustaja</b>. Vaihdetut nappulat kumoavat toisensa eivätkä näy. Luku, esim. <span class="mono">+3</span>, on materiaaliero nappuloiden arvoilla laskettuna.</p>
+      <p>Materiaaliero ja moottorin arvio ovat eri asioita. Jos materiaalia on +3 mutta arvio on vain +0.4, vastustajalla on vastapainoksi jotain muuta, esimerkiksi hyökkäys kuningasta vastaan.</p>
+
+      <h3>Arviopalkki laudan vieressä</h3>
+      <p>Palkki näyttää saman arvion kuvana. Valkoinen osa on valkean etu ja tumma osa mustan. Tasaisessa asemassa palkki on puolillaan. Mitä isompi etu, sitä lähempänä palkki on reunaa. Palkki ei ole lineaarinen, joten +1 näkyy selvästi mutta +8 ja +15 näyttävät lähes samalta.</p>
+
+      <h3>Suositusrivi</h3>
+      <div class="example" aria-hidden="true">
+        <span class="chip"></span>
+        <span class="ev">+0.85</span>
+        <span class="pv">12. <b>Rf3</b> e5 13. d4 Rc6 14. Lb5</span>
+      </div>
+      <ul class="callouts">
+        <li><span class="num">1</span><span><b>+0.85</b>: arvio sen jälkeen, kun tämä linja on pelattu.</span></li>
+        <li><span class="num">2</span><span><b>12.</b> on siirron numero. <span class="mono">12…</span> (kolme pistettä) tarkoittaa, että linja alkaa mustan siirrolla.</span></li>
+        <li><span class="num">3</span><span><b>Lihavoitu siirto</b> (Rf3) on se, jota moottori suosittelee nyt pelattavaksi.</span></li>
+        <li><span class="num">4</span><span>Loput siirrot ovat <b>odotettu jatko</b>: moottorin arvio molempien parhaista vastauksista. Pitkä jatko on vain suuntaa antava.</span></li>
+      </ul>
+      <p>Värit vastaavat laudan nuolia: <span style="color:var(--a1)">■</span> oranssi on paras siirto, <span style="color:var(--a2)">■</span> sininen toiseksi paras ja <span style="color:var(--a3)">■</span> violetti kolmanneksi paras.</p>
+      <p><b>Vertaa rivien arvioita keskenään.</b> Jos paras on +0.80 ja toinen +0.10, asemassa on vain yksi hyvä siirto, ja se kannattaa löytää. Jos kaikki kolme ovat lähes samat, voit valita niistä mieleisesi.</p>
+
+      <h3><span class="tag">??</span> Siirron arvio</h3>
+      <p>Jokainen siirto saa arvion sen mukaan, kuinka paljon siirtäjän <b>voittomahdollisuudet heikkenivät</b>. Siksi +8 → +6 ei ole virhe, koska peli on yhä voitettu, mutta +0.5 → −1.5 on.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Merkki</th><th>Merkitys</th></tr></thead>
+          <tbody>
+            <tr><td><span class="q blunder">??</span> Moka</td><td>Ratkaiseva virhe, esim. nappula hukkaan. Tasaisessa asemassa arvio putoaa noin <span class="thr" data-w="0.3">2,4</span> tai enemmän.</td></tr>
+            <tr><td><span class="q mistake">?</span> Virhe</td><td>Selvä heikennys. Tasaisessa asemassa arvio putoaa noin <span class="thr" data-w="0.2">1,6</span>.</td></tr>
+            <tr><td><span class="q inacc">?!</span> Epätarkkuus</td><td>Pieni heikennys. Tasaisessa asemassa arvio putoaa noin <span class="thr" data-w="0.1">0,8</span>.</td></tr>
+            <tr><td>Hyvä siirto</td><td>Ei merkittävää heikennystä, vaikka moottorilla olisi ollut eri ykkösvaihtoehto.</td></tr>
+            <tr><td>Paras siirto</td><td>Sama siirto, jota moottori suositteli.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li>Merkit näkyvät myös siirtolistassa. Napauta mitä tahansa siirtoa, niin lauta siirtyy siihen asemaan ja kortti näyttää siirron arvion.</li>
+        <li>Kun laudalla on asema heti oman virheesi jälkeen, parempi siirto näkyy <b style="color:var(--q-best)">turkoosina katkoviivanuolena</b>.</li>
+        <li>Arvio tarvitsee moottorin laskelman sekä ennen siirtoa että sen jälkeen, joten merkki ilmestyy hetken viiveellä. Aiemmat asemat lasketaan taustalla syvyyteen 12.</li>
+        <li class="old-engine">Tämä versio käyttää vanhempaa Stockfish 10 -moottoria, joka antaa hieman suurempia lukuja kuin uudemmat moottorit, esimerkiksi Lichessin analyysi. Rajat on mitoitettu sen mukaan, mutta yksittäinen merkintä voi silti poiketa Lichessistä yhden pykälän verran. Sovellusversio osoitteessa shakkivalmentaja.web.app käyttää Stockfish 19:ää.</li>
+        <li>Yhteenveto kertoo kummankin pelaajan mokat, virheet ja epätarkkuudet koko pelistä.</li>
+        <li>Jos "Vain omalla vuorollani" on päällä, moottori laskee silti taustalla, jotta siirtosi voidaan arvioida. Suosituksia ja nuolia ei kuitenkaan näytetä vastustajan vuorolla.</li>
+      </ul>
+
+      <h3>Näkymät</h3>
+      <p>Laudan alla, tietokoneella sen vieressä, on neljä välilehteä:</p>
+      <ul>
+        <li><b>Suositus:</b> moottorin paras siirto, tilanne sanoin ja juuri tehdyn siirron arvio. Pelissä konetta vastaan myös pelin tilanne. Tietokoneella tällä välilehdellä on myös siirtolista.</li>
+        <li><b>Siirrot:</b> pelin siirrot ja sivuvariantit. Napauta siirtoa, niin lauta siirtyy siihen asemaan.</li>
+        <li><b>Analyysi:</b> arviokäyrä, tarkkuus ja käännekohdat. Tuotu tai haettu peli avautuu tänne.</li>
+        <li><b>Pelit:</b> Opi pelaamaan -opetus, pelikirjasto ja omista virheistä kootut harjoitustehtävät.</li>
+        <li><b>Lisää:</b> uusi peli, peli konetta vastaan, pelien haku ja tuonti, asetukset ja nappuloiden arvot.</li>
+      </ul>
+      <p>Laudan alla ovat selauspainikkeet sekä siirron peruminen ja laudan kääntö.</p>
+
+      <h3>Aloittelijatila</h3>
+      <p>Kytke päälle otsikkorivin kytkimestä <b>Aloittelijatila</b>. Se on tarkoitettu shakkiin tutustumiseen:</p>
+      <ul>
+        <li><b>Nappulan liikkeet:</b> kun napautat nappulaa, laudan alla kerrotaan, miten se liikkuu ja montako laillista siirtoa sillä on. Pisteet laudalla näyttävät ruudut, joihin voit siirtää.</li>
+        <li><b>Vaarat:</b> punainen huutomerkki nappulan kulmassa tarkoittaa, että vastustaja voi lyödä sen. Joko mikään ei suojaa sitä, tai sitä uhkaa halvempi nappula. Laudan alla kerrotaan, mikä nappula on vaarassa.</li>
+        <li><b>Siirrot sanoin:</b> moottorin suositus kerrotaan selkokielellä, esim. "Ratsu f3 → e5, lyö sotilaan, shakki". Virheen kohdalla kerrotaan, mitä vastustaja voi sen jälkeen tehdä.</li>
+        <li><b>Vähemmän numeroita:</b> arvioluvut, laskentasyvyys ja FEN-kenttä piilotetaan. Tilanne kerrotaan sanoin, esim. "Valkealla selvä etu".</li>
+      </ul>
+      <p>Kun shakki alkaa tuntua tutulta, kytke tila pois, niin näet kaikki luvut ja vaihtoehdot.</p>
+
+      <h3>Opi pelaamaan</h3>
+      <ul>
+        <li>Pelit-välilehdeltä löytyvät aiheet: sotilas, torni, lähetti, ratsu, daami, kuningas sekä shakki ja matti.</li>
+        <li>Jokaisessa vaiheessa on lyhyt selitys ja tehtävä laudalla. Tavoiteruutu on merkitty katkoviivaympyrällä, ja kun napautat nappulaa, pisteet näyttävät, minne se voi liikkua.</li>
+        <li>Mukana ovat myös erikoissiirrot: sotilaan korotus, ohestalyönti ja linnoitus.</li>
+        <li>Edistyminen muistetaan. Valmiin aiheen kohdalla on rasti. Oma pelisi palaa laudalle, kun lopetat opetuksen.</li>
+      </ul>
+
+      <h3>Pelikirjasto</h3>
+      <ul>
+        <li>Jokainen peli, jossa on vähintään neljä puolisiirtoa, tallentuu automaattisesti <b>Pelit</b>-välilehdelle arvioineen. Tämä koskee haettuja, tuotuja, konetta vastaan pelattuja ja itse syötettyjä pelejä.</li>
+        <li>Napauta peliä, niin se avautuu Analyysiin valmiiksi arvioituna, eikä moottorin tarvitse laskea uudelleen.</li>
+        <li>Samaa Lichess- tai Chess.com-peliä ei tallenneta kahdesti. <b>Muokkaa</b> näyttää poistopainikkeet.</li>
+        <li>Kirjasto on tällä laitteella ja tässä selaimessa. Se ei siirry toiselle laitteelle.</li>
+      </ul>
+
+      <h3>Harjoittele virheitäsi</h3>
+      <ul>
+        <li>Kun pelin analyysi valmistuu, sovellus poimii asemat, joissa teit virheen <span class="q mistake">?</span> tai mokan <span class="q blunder">??</span>, ja tekee niistä tehtäviä.</li>
+        <li>Tehtävässä lauta on asemassa ennen virhettäsi. Etsi parempi siirto. Myös muu kuin moottorin paras siirto hyväksytään, jos se on lähes yhtä hyvä. Moottori tarkistaa sen.</li>
+        <li><b>Vihje</b> korostaa siirrettävän nappulan. <b>Näytä ratkaisu</b> näyttää parhaan siirron nuolena. Väärästä yrityksestä kerrotaan, mitä vastustaja voisi tehdä.</li>
+        <li>Kertaus: ensimmäisellä yrityksellä ilman vihjettä ratkaistu tehtävä palaa 1, 3, 7 ja lopulta 21 päivän päästä. Väärin mennyt tai vihjeellä ratkaistu tulee pian uudelleen. Yhdellä kierroksella on enintään 10 tehtävää.</li>
+        <li>Harjoitus ei muuta varsinaista peliäsi. Se palaa laudalle, kun lopetat harjoituksen.</li>
+      </ul>
+
+      <h3>Omien pelien haku</h3>
+      <ul>
+        <li>Avaa Lisää-välilehdeltä <b>Hae tai tuo peli</b>, valitse Lichess tai Chess.com, kirjoita käyttäjänimesi ja paina <b>Hae pelit</b>. Näet 20 viimeisintä peliäsi.</li>
+        <li>Napauta peliä, niin se avautuu analysoitavaksi. Sovellus tunnistaa nimestäsi, kummilla väreillä pelasit, ja kääntää laudan sen mukaan.</li>
+        <li>Haetaan vain tavallisen shakin pelit. Muunnelmat, kuten Chess960, ohitetaan. Käyttäjänimi muistetaan tällä laitteella.</li>
+        <li>Haku toimii sovellusversiossa osoitteessa shakkivalmentaja.web.app.</li>
+      </ul>
+
+      <h3>Peli konetta vastaan</h3>
+      <ul>
+        <li>Valitse Lisää-välilehden kohdassa <b>Pelaa konetta vastaan</b> väri ja vastustajan taso, ja paina <b>Aloita peli</b>. Kone vastaa siirtoihisi automaattisesti.</li>
+        <li>Tasoja on kahdeksan. Taso 1 tekee paljon virheitä ja sopii aloittelijalle, taso 8 pelaa täydellä voimalla. Tasot ovat suuntaa antavia, joten aloita matalalta ja nosta tasoa, kun voitat helposti.</li>
+        <li>Pelin aikana moottorin suositukset, nuolet, arviopalkki ja siirtojen arviot ovat piilossa, jotta peli on oikeaa harjoittelua. <b>Vihje</b> näyttää parhaan siirron nuolena, ja käytetyt vihjeet lasketaan.</li>
+        <li><b>Peru siirto</b> peruu oman siirtosi ja koneen vastauksen. <b>Luovuta</b> päättää pelin, ja se pitää vahvistaa.</li>
+        <li>Kun peli päättyy, analyysi avautuu: siirtojen arviot, arviokäyrä, tarkkuus ja käännekohdat. Moottori on arvioinut siirtoja jo pelin aikana, joten analyysi on yleensä heti valmis.</li>
+        <li>Keskeneräinen peli säilyy, vaikka suljet sovelluksen. <b>Lopeta pelitila</b> palauttaa tavallisen analyysilaudan.</li>
+      </ul>
+
+      <h3>Pelin analyysi ja PGN-tuonti</h3>
+      <ul>
+        <li><b>Pelin tuonti:</b> kopioi peli PGN-muodossa, avaa Lisää-välilehdeltä "Hae tai tuo peli" ja liitä peli kenttään. Voit myös valita .pgn-tiedoston.
+          <ul>
+            <li>Lichessissä PGN löytyy pelin sivulta kohdasta <i>Jaa ja vie</i>.</li>
+            <li>Chess.comissa se löytyy pelin <i>Jaa</i>-painikkeen takaa välilehdeltä <i>PGN</i>.</li>
+          </ul>
+          Kellonajat ja kommentit ohitetaan. Jos tiedostossa on monta peliä, tuodaan ensimmäinen.</li>
+        <li>Tuonnin jälkeen moottori käy koko pelin läpi, ja edistyminen näkyy palkkina. Analyysi kestää pelin pituudesta ja laitteesta riippuen muutamasta sekunnista pariin minuuttiin.</li>
+        <li><b>Pelasin:</b> jos PGN:ssä on pelaajien nimet, valitse nimesi. Silloin arviot, nuolet ja tekstit "sinun siirtosi" osuvat oikein.</li>
+        <li><b>Arviokäyrä</b> näyttää koko pelin yhdellä silmäyksellä. Valkoinen alue kuvaa valkean etua ja tumma mustan. Mitä lähempänä käyrä on ylä- tai alareunaa, sitä selvempi etu on. Jyrkkä pudotus tarkoittaa virhettä, ja värilliset pisteet merkitsevät epätarkkuuksia, virheitä ja mokia. Napauta käyrää, niin lauta siirtyy siihen kohtaan. Vihreä pystyviiva on laudalla näkyvä kohta.</li>
+        <li><b>Tarkkuus</b> (0–100 %) kertoo, kuinka lähellä moottorin parhaita siirtoja pelaaja pysyi. Laskentatapa on sama kuin Lichessissä, mutta matalamman laskentasyvyyden takia luku on suuntaa antava. Karkeasti yli 90 % on erinomainen, 80–90 % hyvä ja alle 70 % sisältää selviä virheitä.</li>
+        <li><b>Käännekohdat</b> ovat pelin suurimmat virheet ja mokat aikajärjestyksessä. Napauta käännekohtaa, niin näet aseman, siirron arvion ja paremman vaihtoehdon.</li>
+        <li><b>Kopioi PGN</b> kopioi nykyisen pelin, jotta voit viedä sen esimerkiksi Lichessin analyysilaudalle.</li>
+      </ul>
+
+      <h3>Pelin selaaminen ja sivuvariantit</h3>
+      <ul>
+        <li>Napauta siirtoa siirtolistassa, niin lauta näyttää aseman sen siirron jälkeen. Moottori analysoi aina laudalla näkyvää asemaa.</li>
+        <li>Laudan alla olevilla painikkeilla pääset alkuasemaan, edelliseen tai seuraavaan siirtoon ja viimeisimpään siirtoon. Koneella toimivat myös näppäimet ← → Home End, ja F kääntää laudan. Painikkeiden vieressä näkyy, missä kohtaa peliä olet, esim. <span class="mono">14… Lxf2 · 27/40</span>.</li>
+        <li>Jos teet aiemmassa asemassa <b>saman siirron</b> kuin pelissä, siirryt vain eteenpäin. <b>Eri siirto</b> aloittaa <b>sivuvariantin</b>, jolla voit kokeilla, mitä olisi tapahtunut. Varsinainen peli säilyy ennallaan.</li>
+        <li>Sivuvariantti näkyy siirtolistan alla omana laatikkonaan. <b>Palaa peliin</b> poistaa sen ja vie haarautumiskohtaan. <b>Korvaa peli tällä</b> tekee siitä pelin uuden jatkon, ja pelin alkuperäiset siirrot haarautumiskohdan jälkeen poistuvat.</li>
+        <li><b>Peru siirto</b> poistaa näytettävän linjan viimeisen siirron: sivuvariantissa variantin viimeisen siirron, muuten pelin viimeisen siirron.</li>
+        <li>Kun syötät käynnissä olevaa peliä, palaa ensin viimeisimpään siirtoon. Muuten uusi siirto menee sivuvarianttiin.</li>
+      </ul>
+
+      <h3>Tilarivi ylhäällä</h3>
+      <div class="tbl-wrap">
+        <table>
+          <tbody>
+            <tr><td>Laskee · syvyys 12/16</td><td>Moottori on laskenut 12 puolisiirtoa eteenpäin, ja tavoite on 16. Arvio tarkentuu laskennan edetessä, joten luvut voivat vaihdella alussa.</td></tr>
+            <tr><td>Arvioi siirtoja · 3 jäljellä</td><td>Nykyinen asema on laskettu, ja moottori arvioi taustalla pelin aiempia asemia siirtomerkintöjä varten.</td></tr>
+            <tr><td>Valmis · syvyys 16</td><td>Laskenta on valmis, ja arvio on lopullinen tälle asemalle.</td></tr>
+            <tr><td>Vastustajan vuoro</td><td>"Vain omalla vuorollani" on päällä, joten moottori odottaa vastustajan siirtoa.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><b>Puolisiirto</b> on yhden pelaajan yksi siirto. Valkean ja mustan siirto yhdessä ovat siis kaksi puolisiirtoa.</p>
+
+      <h3>Siirtomerkinnät</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Merkki</th><th>Merkitys</th></tr></thead>
+          <tbody>
+            <tr><td>K D T L R</td><td>Kuningas, daami, torni, lähetti, ratsu</td></tr>
+            <tr><td>e4</td><td>Ilman kirjainta: sotilas siirtyy ruutuun e4</td></tr>
+            <tr><td>Rf3</td><td>Ratsu siirtyy ruutuun f3</td></tr>
+            <tr><td>x</td><td>Lyönti, esim. <span class="mono">Lxc6</span> = lähetti lyö ruudussa c6</td></tr>
+            <tr><td>exd5</td><td>e-linjan sotilas lyö ruudussa d5</td></tr>
+            <tr><td>+</td><td>Shakki</td></tr>
+            <tr><td>#</td><td>Matti</td></tr>
+            <tr><td>O-O</td><td>Lyhyt linnoitus (kuninkaan puolelle)</td></tr>
+            <tr><td>O-O-O</td><td>Pitkä linnoitus (daamin puolelle)</td></tr>
+            <tr><td>e8=D</td><td>Sotilas korottuu daamiksi</td></tr>
+            <tr><td>Rbd2</td><td>Kaksi ratsua voi mennä ruutuun d2, b-linjan ratsu menee</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Laudan kirjaimet ja numerot</h3>
+      <p>Kirjaimet <b>a–h</b> ovat pystylinjoja vasemmalta oikealle valkean puolelta katsottuna. Numerot <b>1–8</b> ovat vaakarivejä: rivi 1 on valkean takarivi ja rivi 8 mustan. Jokaisella ruudulla on näin oma nimi, esim. e4.</p>
+
+      <h3>Asetukset</h3>
+      <ul>
+        <li><b>Laskentasyvyys:</b> kuinka monta puolisiirtoa moottori laskee eteenpäin. Suurempi luku on tarkempi mutta hitaampi. Puhelimessa 12–14 on hyvä, koneella 16–20.</li>
+        <li><b>Vaihtoehtoja:</b> kuinka monta parasta siirtoa näytetään (1–3). Yhden vaihtoehdon laskenta on nopein.</li>
+      </ul>
+
+      <h3>FEN</h3>
+      <p>FEN on yksi tekstirivi, joka kuvaa koko aseman. Sillä voi siirtää aseman sovellusten välillä. Esimerkki alkuasemasta:</p>
+      <p class="mono" style="overflow-wrap:anywhere">rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1</p>
+      <ul>
+        <li><b>1. osa:</b> nappulat riveittäin rivistä 8 alkaen. Isot kirjaimet ovat valkeita ja pienet mustia. Kirjaimet ovat englanniksi: K kuningas, Q daami, R torni, B lähetti, N ratsu, P sotilas. Numero tarkoittaa tyhjiä ruutuja.</li>
+        <li><b>w / b:</b> siirtovuoro, w valkea ja b musta.</li>
+        <li><b>KQkq:</b> jäljellä olevat linnoitusoikeudet, <b>-</b> jos niitä ei ole.</li>
+        <li><b>-</b> tai ruutu: mahdollinen ohestalyöntiruutu.</li>
+        <li><b>0:</b> puolisiirrot viimeisen lyönnin tai sotilassiirron jälkeen (50 siirron sääntö).</li>
+        <li><b>1:</b> siirron numero.</li>
+      </ul>
+    </div>
+  </div>
+</div>

@@ -1,17 +1,59 @@
-// Rakentaa Firebase Hosting -version (public/) lähdetiedostosta shakkivalmentaja.html.
-// Käyttö: node build.js   (ajetaan automaattisesti ennen `firebase deploy` -komentoa)
+// Kokoaa sovelluksen src/-kansiosta kahdeksi versioksi:
+//   dist/shakkivalmentaja.html  yksi itsenäinen tiedosto (Stockfish 10 CDN:stä), toimii esim. claude.ai-artifactina
+//   public/index.html + sw.js   Firebase Hosting -versio (Stockfish 19, pelien haku, PWA)
+// Käyttö: node build.js   (ajetaan automaattisesti ennen `firebase deploy` -komentoa ja testejä)
 const fs = require("fs");
 const path = require("path");
 
 const root = __dirname;
+const srcDir = path.join(root, "src");
 const pub = path.join(root, "public");
-let src = fs.readFileSync(path.join(root, "shakkivalmentaja.html"), "utf8");
+const dist = path.join(root, "dist");
+const read = (...p) => fs.readFileSync(path.join(srcDir, ...p), "utf8");
+
+// JavaScript-tiedostot tässä järjestyksessä yhden funktion sisään: ne jakavat saman näkyvyysalueen,
+// joten tiedosto voi käyttää aiempien tiedostojen muuttujia ja kaikkien tiedostojen funktioita.
+const JS_FILES = [
+  "core.js",          // vakiot, tila, tallennus, apurit
+  "board.js",         // laudan piirto
+  "coach.js",         // aloittelijatila: vaarat ja siirrot sanoin
+  "pieces.js",        // nappuloiden animaatio ja materiaali
+  "game-line.js",     // pelilinja, sivuvariantit, arvioiden tallennus ja siirtojen luokittelu
+  "moves-panel.js",   // siirtolista, selaus ja siirron arvio
+  "analysis.js",      // koko pelin analyysi: käyrä, tarkkuus, käännekohdat
+  "pgn.js",           // PGN-tuonti ja -vienti
+  "input.js",         // siirtojen syöttö laudalla
+  "settings.js",      // asetukset ja FEN
+  "fetch.js",         // omien pelien haku Lichessistä ja Chess.comista
+  "play.js",          // peli konetta vastaan
+  "engine.js",        // analyysimoottori
+  "suggestions.js",   // suositukset, arviopalkki ja nuolet
+  "help.js",          // ohje ja näytön pito päällä
+  "library.js",       // pelikirjasto (IndexedDB) ja Pelit-välilehti
+  "practice.js",      // Harjoittele virheitäsi -tehtävät
+  "tutorial.js",      // Opi pelaamaan -opetus
+  "tabs.js",          // välilehdet
+  "main.js",          // koko näkymän päivitys ja käynnistys
+];
 
 function replaceOnce(str, from, to) {
   if (!str.includes(from)) throw new Error("build.js: kohtaa ei löytynyt: " + from);
-  return str.replace(from, to);
+  return str.replace(from, () => to);
 }
 
+const indent = (text) => text.replace(/^(?=.)/gm, "  ");
+const script = "<script>\n(function () {\n  \"use strict\";\n" +
+  JS_FILES.map((f) => indent(read("js", f))).join("\n") +
+  "})();\n</script>\n";
+
+let standalone = read("index.html");
+standalone = replaceOnce(standalone, "<!-- build: styles.css -->\n", "<style>\n" + read("styles.css") + "</style>\n");
+standalone = replaceOnce(standalone, "<!-- build: help.html -->\n", read("help.html"));
+standalone = replaceOnce(standalone, "<!-- build: js -->\n", script);
+fs.mkdirSync(dist, { recursive: true });
+fs.writeFileSync(path.join(dist, "shakkivalmentaja.html"), standalone);
+
+// ---------- Firebase-versio ----------
 const HEAD_EXTRA = `<meta name="description" content="Shakkilauta, johon syötät siirrot ja Stockfish näyttää parhaat jatkot nuolina.">
 <meta name="theme-color" content="#1f4e79">
 <link rel="manifest" href="manifest.webmanifest">
@@ -42,8 +84,6 @@ const INSTALL_UI = `<div class="install" id="installRow" hidden>
     <p class="install-hint" id="iosHint" hidden>Asenna iPhoneen tai iPadiin: avaa sivu Safarissa, napauta <b>Jaa</b>-painiketta (neliö ja nuoli ylös) ja valitse <b>Lisää Koti-valikkoon</b>.</p>
     <p class="note">`;
 
-
-
 const INSTALL_SCRIPT = `<script>
 (function () {
   const btn = document.getElementById("installBtn"), row = document.getElementById("installRow"), hint = document.getElementById("iosHint");
@@ -72,10 +112,10 @@ if ("serviceWorker" in navigator) {
 }
 </script>`;
 
-const split = src.indexOf('<div class="app">');
+const split = standalone.indexOf('<div class="app">');
 if (split < 0) throw new Error("build.js: sovelluksen runkoa ei löytynyt");
-let head = src.slice(0, split);
-let body = src.slice(split);
+let head = standalone.slice(0, split);
+let body = standalone.slice(split);
 
 head = replaceOnce(head, "<title>", HEAD_EXTRA + "<title>");
 body = replaceOnce(body, '<p class="note">', INSTALL_UI);
@@ -151,4 +191,4 @@ self.addEventListener("fetch", (e) => {
 `;
 fs.writeFileSync(path.join(pub, "sw.js"), sw);
 
-console.log("Valmis: public/index.html ja public/sw.js (välimuistiversio " + version + ")");
+console.log("Valmis: dist/shakkivalmentaja.html, public/index.html ja public/sw.js (välimuistiversio " + version + ")");

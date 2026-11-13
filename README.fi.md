@@ -14,13 +14,17 @@ Kaikki toimii selaimessa ilman palvelinta: moottori, analyysi ja pelikirjasto py
 
 | Tiedosto | Mitä se on |
 |---|---|
-| `shakkivalmentaja.html` | Koko sovellus yhdessä tiedostossa. Tätä muokataan. |
-| `build.js` | Tekee siitä Firebase-version: `public/index.html` (Stockfish 19, pelien haku, PWA) ja `public/sw.js`. |
+| `src/index.html` | Sivun rakenne. Rakennus täyttää siinä olevat paikkamerkit. |
+| `src/styles.css`, `src/help.html` | Tyylit ja ohjeikkuna. |
+| `src/js/` | Sovelluksen koodi ominaisuuksittain (lauta, moottori, analyysi, kirjasto, harjoitus, opetus jne.). |
+| `build.js` | Kokoaa osat: `dist/shakkivalmentaja.html` (yksi itsenäinen tiedosto) sekä Firebase-versio `public/index.html` (Stockfish 19, pelien haku, PWA) ja `public/sw.js`. |
 | `public/` | Firebase Hostingin tiedostot: moottori, chess.js, kuvakkeet, manifesti. |
 | `tests/` | Selaintestit headless-Chromella. |
 | `tools/make_icons.py` | Luo sovelluksen kuvakkeet (vaatii Pillow-kirjaston). |
 
-Sama `shakkivalmentaja.html` toimii myös sellaisenaan claude.ai-artifactina. Silloin käytössä on Stockfish 10 CDN:stä, eikä pelien hakua ole.
+JavaScript-tiedostot kootaan `build.js`:ssä luetellussa järjestyksessä yhden funktion sisään, joten ne jakavat saman näkyvyysalueen. Uusi tiedosto lisätään listaan oikeaan kohtaan.
+
+`dist/shakkivalmentaja.html` toimii sellaisenaan esimerkiksi claude.ai-artifactina. Silloin käytössä on Stockfish 10 CDN:stä, eikä pelien hakua ole.
 
 ## Komennot
 
@@ -29,7 +33,7 @@ Vaatii Node 22:n tai uudemman.
 ```sh
 npm test              # rakentaa ja ajaa kaikki selaintestit (noin 2–3 min)
 npm run test:offline  # sama ilman Lichessiä ja Chess.comia käyttäviä testejä
-npm run build         # pelkkä rakennus public/-kansioon
+npm run build         # pelkkä rakennus: dist/ ja public/
 npm run deploy        # julkaisu Firebaseen (rakentaa ensin automaattisesti)
 ```
 

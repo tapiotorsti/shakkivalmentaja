@@ -1,0 +1,266 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shakkivalmentaja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Symbols+2&display=swap">
+<!-- build: styles.css -->
+
+<div class="app">
+  <header class="top">
+    <h1>Shakki<span>valmentaja</span></h1>
+    <div class="top-actions">
+      <div class="pill" id="status" data-state="idle"><i></i><span id="statusText">Ladataan moottoria…</span></div>
+      <label class="bswitch" title="Selittää siirrot sanoin, varoittaa uhatuista nappuloista ja piilottaa numerot">
+        <input type="checkbox" id="beginnerToggle"> Aloittelijatila
+      </label>
+      <button class="linkbtn" id="helpBtn" type="button" aria-haspopup="dialog">Ohje</button>
+    </div>
+  </header>
+
+  <section class="board-col" aria-label="Lauta">
+    <div class="mat" id="matTop"></div>
+    <div class="board-row">
+      <div class="evalbar" id="evalbar" aria-hidden="true"><div class="fill" id="evalfill"></div></div>
+      <div class="board-wrap" id="boardWrap">
+        <div class="board" id="board" role="grid" aria-label="Shakkilauta"></div>
+        <svg class="arrows" id="arrows" viewBox="0 0 8 8" aria-hidden="true"></svg>
+        <div class="promo" id="promo" hidden><div class="box" id="promoBox"></div></div>
+      </div>
+    </div>
+    <div class="mat" id="matBottom"></div>
+    <div class="coach" id="coach" hidden aria-live="polite"></div>
+    <div class="controls">
+    <div class="navrow" role="group" aria-label="Selaa peliä">
+      <button class="btn icon" id="navStart" type="button" aria-label="Alkuasemaan" title="Alkuasemaan (Home)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3.5 3v10M12 3 7 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn icon" id="navPrev" type="button" aria-label="Edellinen siirto" title="Edellinen siirto (←)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn icon" id="navNext" type="button" aria-label="Seuraava siirto" title="Seuraava siirto (→)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn icon" id="navEnd" type="button" aria-label="Viimeisimpään siirtoon" title="Viimeisimpään siirtoon (End)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 3l5 5-5 5M12.5 3v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <span class="navpos" id="navPos" aria-live="polite"></span>
+    <div class="toolbar">
+      <button class="btn icon quiet" id="undoBtn" type="button" aria-label="Peru siirto" title="Peru siirto">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 3 2.5 6.5 6 10M3 6.5h6.5a3.5 3.5 0 0 1 0 7H7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn icon quiet" id="flipBtn" type="button" aria-label="Käännä lauta" title="Käännä lauta (F)">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M5 13V3M2.5 5.5 5 3l2.5 2.5M11 3v10M8.5 10.5 11 13l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <div class="tabs" role="tablist" aria-label="Paneelin näkymät">
+      <button class="tab" role="tab" type="button" data-t="now" aria-selected="true">Suositus</button>
+      <button class="tab" role="tab" type="button" data-t="moves" aria-selected="false">Siirrot</button>
+      <button class="tab" role="tab" type="button" data-t="ana" aria-selected="false">Analyysi</button>
+      <button class="tab" role="tab" type="button" data-t="games" aria-selected="false">Pelit</button>
+      <button class="tab" role="tab" type="button" data-t="more" aria-selected="false">Lisää</button>
+    </div>
+    <div class="tabbody" id="tabBody" role="tabpanel">
+    <section class="section live-play" id="playSec" data-tab="now" hidden>
+      <div class="play" id="playLive">
+        <div class="vs" id="playVs"></div>
+        <p class="pstate" id="playState"></p>
+        <p class="hint" id="playNote" hidden></p>
+        <div class="play-actions" id="playActions"></div>
+      </div>
+      <p class="msg" id="playMsg"></p>
+    </section>
+
+    <section class="section live-play" id="tutorialSec" data-tab="now" hidden>
+      <div class="play">
+        <div class="vs" id="tuHead"></div>
+        <p class="tutext" id="tuText"></p>
+        <p class="pstate" id="tuTask"></p>
+        <p class="prnote" id="tuNote"></p>
+        <div class="play-actions" id="tuActions"></div>
+      </div>
+    </section>
+
+    <section class="section live-play" id="practiceSec" data-tab="now" hidden>
+      <div class="play">
+        <div class="vs" id="prHead"></div>
+        <p class="pstate" id="prState"></p>
+        <p class="prnote" id="prNote"></p>
+        <div class="play-actions" id="prActions"></div>
+      </div>
+    </section>
+
+    <section class="section" data-tab="now">
+      <h2>Moottorin suositukset</h2>
+      <p class="verdict" id="verdict" hidden></p>
+      <div class="lines" id="lines"></div>
+      <p class="hint"><button class="linkbtn" type="button" data-help>Mitä luvut tarkoittavat?</button></p>
+    </section>
+
+    <section class="section" data-tab="now">
+      <h2>Siirron arvio</h2>
+      <div class="review empty" id="review">Tee siirto, niin näet tässä, kuinka hyvä se oli.</div>
+    </section>
+
+    <section class="section" data-tab="moves">
+      <h2>Siirrot</h2>
+      <div class="moves" id="moves"></div>
+      <div class="varbox" id="varBox" hidden>
+        <div class="var-head"><b>Sivuvariantti</b> <span id="varFrom"></span></div>
+        <div class="var-moves" id="varMoves"></div>
+        <div class="var-actions">
+          <button class="btn" id="varExit" type="button">Palaa peliin</button>
+          <button class="btn quiet" id="varPromote" type="button">Korvaa peli tällä</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-tab="ana">
+      <h2>Pelin analyysi</h2>
+      <p class="ana-empty" id="anaEmpty">Analyysi näkyy, kun pelissä on siirtoja. Voit myös tuoda valmiin pelin kohdasta "Tuo tai vie peli".</p>
+      <div class="ana" id="anaBody" hidden>
+        <div class="ginfo" id="gameInfo" hidden></div>
+        <div class="graph-wrap" id="graphWrap">
+          <svg id="graph" role="img" aria-label="Arviokäyrä koko pelistä"></svg>
+          <div class="gcross" id="gcross" hidden></div>
+          <div class="gtip" id="gtip" hidden></div>
+        </div>
+        <div class="progress" id="anaProgress" hidden>
+          <div class="pbar"><i id="anaBar"></i></div>
+          <span id="anaText"></span>
+        </div>
+        <div class="tbl-scroll"><table class="stats" id="pcards"></table></div>
+        <h3 class="subh">Käännekohdat</h3>
+        <div class="rows" id="turns"></div>
+      </div>
+    </section>
+
+    <section class="section" data-tab="games">
+      <h2>Opi pelaamaan</h2>
+      <p class="hint lessons-intro">Lyhyet tehtävät laudalla: miten kukin nappula liikkuu ja lyö, erikoissiirrot sekä shakki ja matti.</p>
+      <div class="rows" id="lessonList"></div>
+    </section>
+
+    <section class="section" data-tab="games">
+      <h2>Harjoittele virheitäsi</h2>
+      <div class="prcard" id="prCard"><p class="hint">Ladataan…</p></div>
+    </section>
+
+    <section class="section" data-tab="games">
+      <div class="libhead">
+        <h2>Pelikirjasto</h2>
+        <button class="linkbtn" id="libEdit" type="button" hidden>Muokkaa</button>
+      </div>
+      <div class="rows" id="libList"></div>
+      <p class="hint" id="libNote"></p>
+    </section>
+
+    <div class="tools" data-tab="more">
+      <div class="tool-actions">
+        <button class="btn" id="newBtn" type="button">Uusi peli</button>
+        <span class="hint">Tyhjentää laudan alkuasemaan.</span>
+      </div>
+      <p class="values" aria-label="Nappuloiden arvot sotilaina">
+        <span class="vlabel">Arvot</span>
+        <span><span class="piece w">♟&#xFE0E;</span>1</span>
+        <span><span class="piece w">♞&#xFE0E;</span>3</span>
+        <span><span class="piece w">♝&#xFE0E;</span>3</span>
+        <span><span class="piece w">♜&#xFE0E;</span>5</span>
+        <span><span class="piece w">♛&#xFE0E;</span>9</span>
+        <span class="vnote">sotilaina, sama yksikkö kuin arviossa</span>
+      </p>
+      <details class="fold" id="foldPlay">
+        <summary>Pelaa konetta vastaan</summary>
+        <div class="fold-body play" id="playSetup">
+          <div class="seg" id="playColor" role="group" aria-label="Oma väri">
+            <button type="button" data-v="w" aria-pressed="true">Valkeilla</button>
+            <button type="button" data-v="b" aria-pressed="false">Mustilla</button>
+            <button type="button" data-v="r" aria-pressed="false">Arvo</button>
+          </div>
+          <div class="field">
+            <label for="playLevel">Vastustajan taso <span class="lvlname" id="playLevelName">Satunnainen pelaaja</span></label>
+            <div class="range"><input type="range" id="playLevel" min="1" max="8" step="1" value="3"><output id="playLevelOut">3</output></div>
+          </div>
+          <div><button class="btn primary" id="playStart" type="button">Aloita peli</button></div>
+        </div>
+      </details>
+
+      <details class="fold" id="foldIO">
+        <summary>Hae tai tuo peli</summary>
+        <div class="fold-body">
+          <div class="fetch" id="fetchBox">
+            <span class="lbl">Omat pelit</span>
+            <div class="seg" id="srcSeg" role="group" aria-label="Palvelu">
+              <button type="button" data-v="lichess" aria-pressed="true">Lichess</button>
+              <button type="button" data-v="chesscom" aria-pressed="false">Chess.com</button>
+            </div>
+            <form class="fen" id="fetchForm">
+              <input id="userInput" type="text" placeholder="Käyttäjänimi" autocomplete="username" autocapitalize="none" spellcheck="false" aria-label="Käyttäjänimi">
+              <button class="btn primary" id="fetchBtn" type="submit">Hae pelit</button>
+            </form>
+            <p class="msg" id="fetchMsg"></p>
+            <div class="rows glist" id="gameList" hidden></div>
+          </div>
+          <p class="hint" id="fetchOff" hidden>Omien pelien haku Lichessistä ja Chess.comista toimii sovellusversiossa osoitteessa shakkivalmentaja.web.app.</p>
+          <span class="lbl adv">PGN-teksti tai -tiedosto</span>
+          <textarea id="pgnInput" class="pgn" rows="3" spellcheck="false" autocomplete="off" aria-label="PGN-teksti" placeholder="Liitä peli PGN-muodossa, esim. 1. e4 e5 2. Nf3 Nc6 …"></textarea>
+          <div class="fen">
+            <button class="btn primary" id="importPgn" type="button">Tuo peli</button>
+            <label class="btn" for="pgnFile">Valitse tiedosto</label>
+            <input class="vh" type="file" id="pgnFile" accept=".pgn,.txt,application/x-chess-pgn,text/plain">
+            <button class="btn quiet" id="copyPgn" type="button">Kopioi PGN</button>
+          </div>
+          <p class="msg" id="pgnMsg"></p>
+          <label class="lbl adv" for="fenInput">Asema (FEN)</label>
+          <div class="fen adv">
+            <input id="fenInput" type="text" spellcheck="false" autocomplete="off">
+            <button class="btn" id="loadFen" type="button">Lataa</button>
+            <button class="btn quiet" id="copyFen" type="button">Kopioi</button>
+          </div>
+          <p class="msg adv" id="fenMsg"></p>
+        </div>
+      </details>
+
+      <details class="fold" id="foldSettings">
+        <summary>Asetukset</summary>
+        <div class="fold-body settings">
+          <div class="field">
+            <span class="lbl">Pelaan</span>
+            <div class="seg" id="colorSeg">
+              <button type="button" data-v="w" aria-pressed="true">Valkeilla</button>
+              <button type="button" data-v="b" aria-pressed="false">Mustilla</button>
+            </div>
+          </div>
+          <label class="check"><input type="checkbox" id="onlyMine"> Näytä suositukset vain omalla vuorollani</label>
+          <div class="field adv">
+            <label for="depth">Laskentasyvyys (puolisiirtoja)</label>
+            <div class="range"><input type="range" id="depth" min="8" max="22" step="1" value="16"><output id="depthOut">16</output></div>
+          </div>
+          <div class="field adv">
+            <span class="lbl">Vaihtoehtoja</span>
+            <div class="seg" id="pvSeg">
+              <button type="button" data-v="1" aria-pressed="false">1</button>
+              <button type="button" data-v="2" aria-pressed="false">2</button>
+              <button type="button" data-v="3" aria-pressed="true">3</button>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="more-foot" data-tab="more">
+    <p class="note"><span class="engine-name">Stockfish 10</span> laskee suoraan selaimessasi. Merkinnät: K kuningas, D daami, T torni, L lähetti, R ratsu. Käytä analyysiin ja harjoitteluun, älä käynnissä oleviin peleihin muita ihmisiä vastaan.</p>
+    </div>
+    </div>
+  </aside>
+</div>
+
+<!-- build: help.html -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<!-- build: js -->

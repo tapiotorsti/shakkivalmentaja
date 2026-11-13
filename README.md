@@ -25,9 +25,9 @@ Shakkivalmentaja ("chess coach") is a Finnish-language chess training app. Stock
 
 ## How it is built
 
-- **No framework, no runtime dependencies.** The whole app is one HTML file of plain JavaScript and CSS ([shakkivalmentaja.html](shakkivalmentaja.html)), with [chess.js](https://github.com/jhlywa/chess.js) for move rules.
+- **No framework, no runtime dependencies.** The app is plain JavaScript, HTML and CSS in [src/](src/), with [chess.js](https://github.com/jhlywa/chess.js) for move rules. The JavaScript is split into 20 files by feature (board, engine, analysis, library, practice, lessons and so on). The build concatenates them, in a fixed order, into one function scope.
 - **Stockfish 19 (WebAssembly) in Web Workers.** One worker analyses the position shown on the board and evaluates earlier positions in the background. A second worker plays as the opponent and checks moves in the puzzles.
-- **One source, two builds.** [build.js](build.js) turns the source file into the hosted PWA: it adds Stockfish 19, the service worker, the manifest and game fetching. The same source file also runs on its own as a single HTML page, for example as a claude.ai artifact, using Stockfish 10 from a CDN. Evaluations are rescaled per engine (`ENGINE_INFO.cpScale`) so that move classifications stay consistent between the two engines.
+- **One source, two builds.** [build.js](build.js) builds two versions from `src/`. The first is a single self-contained HTML file that uses Stockfish 10 from a CDN and runs anywhere, for example as a claude.ai artifact. The second is the hosted PWA, which adds Stockfish 19, the service worker, the manifest and game fetching. Evaluations are rescaled per engine (`ENGINE_INFO.cpScale`) so that move classifications stay consistent between the two engines.
 - **Offline first.** A versioned service worker caches the app and the engine. The page itself is fetched network-first so that updates arrive.
 - **Browser tests without a test framework.** [tests/run.mjs](tests/run.mjs) builds the app, serves it locally, and drives headless Chrome through the DevTools protocol using only Node's standard library. Nine suites cover navigation, animations, layout stability, analysis, play, the library and practice, lessons, and game fetching.
 
@@ -36,7 +36,7 @@ Shakkivalmentaja ("chess coach") is a Finnish-language chess training app. Stock
 Requires Node 22+ and Chrome or Edge (set `CHROME_PATH` if it is not found automatically).
 
 ```sh
-npm run build         # build public/ (index.html and sw.js)
+npm run build         # build dist/shakkivalmentaja.html and public/ (index.html, sw.js)
 npm test              # build and run all browser tests (~2–3 min)
 npm run test:offline  # skip the tests that call Lichess and Chess.com
 ```
@@ -45,8 +45,10 @@ To try the app, serve `public/` with any static file server after building, for 
 
 | Path | Contents |
 |---|---|
-| `shakkivalmentaja.html` | The whole app; this is the file to edit |
-| `build.js` | Builds the hosted version into `public/` |
+| `src/index.html` | Page markup, with placeholders that the build fills in |
+| `src/styles.css`, `src/help.html` | Styles and the help dialog |
+| `src/js/` | App code by feature; the build order is listed in `build.js` |
+| `build.js` | Builds `dist/shakkivalmentaja.html` (standalone) and `public/` (hosted) |
 | `public/` | Static assets: Stockfish, chess.js, icons, manifest |
 | `tests/` | Headless-Chrome browser tests |
 | `tools/make_icons.py` | Generates the app icons (requires Pillow) |
