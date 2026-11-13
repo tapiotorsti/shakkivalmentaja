@@ -36,6 +36,9 @@ const JS_FILES = [
   "main.js",          // koko näkymän päivitys ja käynnistys
 ];
 
+module.exports = { JS_FILES };
+if (require.main !== module) return; // yksikkötestit lukevat vain tiedostolistan, eivät rakenna
+
 function replaceOnce(str, from, to) {
   if (!str.includes(from)) throw new Error("build.js: kohtaa ei löytynyt: " + from);
   return str.replace(from, () => to);

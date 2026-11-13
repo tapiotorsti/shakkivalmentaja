@@ -104,10 +104,15 @@ async function practiceMove(m) {
   }, 900);
 }
 
+// Seuraava kertaus: ensimmäisellä yrityksellä ilman vihjettä ratkaistu nousee laatikon ylemmäs, muu palaa alkuun
+function nextReview(box, clean, now) {
+  const next = clean ? Math.min(BOX_MS.length - 1, (box || 0) + 1) : 0;
+  return { box: next, due: now + BOX_MS[next] };
+}
+
 function recordResult(clean) {
   const p = practice.puzzle;
-  p.box = clean ? Math.min(BOX_MS.length - 1, (p.box || 0) + 1) : 0;
-  p.due = Date.now() + BOX_MS[p.box];
+  Object.assign(p, nextReview(p.box, clean, Date.now()));
   p.attempts = (p.attempts || 0) + practice.attempts + 1;
   if (clean) { p.solved = (p.solved || 0) + 1; practice.correct++; }
   practice.done++;

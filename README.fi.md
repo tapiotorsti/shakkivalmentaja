@@ -37,7 +37,8 @@ JavaScript-tiedostot kootaan `build.js`:ssä luetellussa järjestyksessä yhden 
 Vaatii Node 22:n tai uudemman.
 
 ```sh
-npm test              # rakentaa ja ajaa kaikki selaintestit (noin 2–3 min)
+npm run test:unit     # pelkät yksikkötestit (alle sekunti, ei selainta)
+npm test              # yksikkötestit, sitten rakennus ja kaikki selaintestit (noin 2–3 min)
 npm run test:offline  # sama ilman Lichessiä ja Chess.comia käyttäviä testejä
 npm run build         # pelkkä rakennus: dist/ ja public/
 npm run deploy        # julkaisu Firebaseen (rakentaa ensin automaattisesti)

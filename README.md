@@ -34,6 +34,7 @@ Shakkivalmentaja ("chess coach") is a Finnish-language chess training app. Stock
 - **Stockfish 19 (WebAssembly) in Web Workers.** One worker analyses the position shown on the board and evaluates earlier positions in the background. A second worker plays as the opponent and checks moves in the puzzles.
 - **One source, two builds.** [build.js](build.js) builds two versions from `src/`. The first is a single self-contained HTML file that uses Stockfish 10 from a CDN and runs anywhere, for example as a claude.ai artifact. The second is the hosted PWA, which adds Stockfish 19, the service worker, the manifest and game fetching. Evaluations are rescaled per engine (`ENGINE_INFO.cpScale`) so that move classifications stay consistent between the two engines.
 - **Offline first.** A versioned service worker caches the app and the engine. The page itself is fetched network-first so that updates arrive.
+- **Unit tests against the real source.** The source files are not modules, so [tests/unit/harness.mjs](tests/unit/harness.mjs) loads them into a Node `vm` context in build order, with chess.js and a minimal DOM stub. The `node:test` suites then call the app's own functions directly: move classification, accuracy, beginner hints, PGN parsing, the review schedule and the Lichess/Chess.com response parsing (with a stubbed `fetch`). They run in under a second and have already caught a bug in the beginner hints.
 - **Browser tests without a test framework.** [tests/run.mjs](tests/run.mjs) builds the app, serves it locally, and drives headless Chrome through the DevTools protocol using only Node's standard library. Nine suites cover navigation, animations, layout stability, analysis, play, the library and practice, lessons, and game fetching.
 
 ## Running locally
@@ -42,8 +43,9 @@ Requires Node 22+ and Chrome or Edge (set `CHROME_PATH` if it is not found autom
 
 ```sh
 npm run build         # build dist/shakkivalmentaja.html and public/ (index.html, sw.js)
-npm test              # build and run all browser tests (~2–3 min)
-npm run test:offline  # skip the tests that call Lichess and Chess.com
+npm run test:unit     # unit tests only (<1 s, no browser needed)
+npm test              # unit tests, then build and run all browser tests (~2–3 min)
+npm run test:offline  # the same without the tests that call Lichess and Chess.com
 ```
 
 To try the app, serve `public/` with any static file server after building, for example `npx serve public`. To deploy to your own Firebase project, run `npm run deploy` (requires the Firebase CLI and your own project ID in `.firebaserc`).

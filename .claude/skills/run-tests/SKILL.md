@@ -5,7 +5,13 @@ description: Run, read and debug Shakkivalmentaja's headless-Chrome browser test
 
 # Running and debugging the browser tests
 
-## Run
+## Unit tests
+
+`npm run test:unit` runs `tests/unit/*.test.mjs` with `node:test` in under a second. `harness.mjs` loads the real `src/js` files into a `vm` context, and `loadApp({ hosted, fetch })` returns access to their top-level names. Use `setEval` and `positionsFrom` for analysis tests, and pass a fake `fetch` for the game-fetching code. Objects returned from the app come from another realm: compare them with `assert.deepEqual({ ...obj }, …)` or field by field, not with `deepStrictEqual` on the object itself.
+
+When a unit test fails, run that file alone (`node --test tests/unit/coach.test.mjs`). Node prints the assertion with its expected and actual values.
+
+## Browser tests: run
 
 ```sh
 npm run test:offline                      # all suites except the network one (~2.5 min)
