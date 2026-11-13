@@ -52,6 +52,7 @@ To try the app, serve `public/` with any static file server after building, for 
 | `public/` | Static assets: Stockfish, chess.js, icons, manifest |
 | `tests/` | Headless-Chrome browser tests |
 | `tools/make_icons.py` | Generates the app icons (requires Pillow) |
+| `AGENTS.md`, `.claude/skills/` | Instructions and workflows for AI coding agents (`CLAUDE.md` imports `AGENTS.md`) |
 
 ## License
 

@@ -21,6 +21,7 @@ Kaikki toimii selaimessa ilman palvelinta: moottori, analyysi ja pelikirjasto py
 | `public/` | Firebase Hostingin tiedostot: moottori, chess.js, kuvakkeet, manifesti. |
 | `tests/` | Selaintestit headless-Chromella. |
 | `tools/make_icons.py` | Luo sovelluksen kuvakkeet (vaatii Pillow-kirjaston). |
+| `AGENTS.md`, `.claude/skills/` | Ohjeet ja työnkulut AI-koodaustyökaluille. `CLAUDE.md` tuo `AGENTS.md`:n sisällön Claude Codelle. |
 
 JavaScript-tiedostot kootaan `build.js`:ssä luetellussa järjestyksessä yhden funktion sisään, joten ne jakavat saman näkyvyysalueen. Uusi tiedosto lisätään listaan oikeaan kohtaan.
 

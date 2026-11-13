@@ -7,7 +7,7 @@ public/sw.js
 .firebase/
 
 # Claude Coden paikalliset asetukset
-.claude/
+.claude/settings.local.json
 
 # Testien kuvakaappaukset
 tests/output/
