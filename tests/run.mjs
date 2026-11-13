@@ -87,7 +87,10 @@ function serve() {
 async function startChrome(profile) {
   const chrome = spawn(findChrome(), [
     "--headless=new", `--remote-debugging-port=${CDP_PORT}`, `--user-data-dir=${profile}`,
-    "--no-first-run", "--no-default-browser-check", "--disable-extensions", "about:blank",
+    "--no-first-run", "--no-default-browser-check", "--disable-extensions",
+    // CI:n Linux-koneilla Chromen hiekkalaatikko ei käynnisty (AppArmor rajoittaa käyttäjänimiavaruuksia)
+    ...(process.env.CI ? ["--no-sandbox"] : []),
+    "about:blank",
   ], { stdio: "ignore" });
   for (let i = 0; i < 60; i++) {
     try { const r = await fetch(CDP_URL + "/json/version"); if (r.ok) return chrome; } catch (e) { /* ei vielä käynnissä */ }

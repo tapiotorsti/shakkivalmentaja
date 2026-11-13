@@ -1,7 +1,13 @@
 {
   "name": "shakkivalmentaja",
   "private": true,
-  "description": "Shakkilauta, johon syötät siirrot ja Stockfish näyttää parhaat jatkot nuolina.",
+  "description": "Chess coach in the browser: Stockfish suggestions as arrows, game analysis, Lichess/Chess.com import and practice puzzles from your own mistakes.",
+  "license": "GPL-3.0-only",
+  "homepage": "https://shakkivalmentaja.web.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tapiotorsti/shakkivalmentaja.git"
+  },
   "scripts": {
     "build": "node build.js",
     "test": "node tests/run.mjs",
